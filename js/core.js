@@ -106,7 +106,7 @@
 
   /* ---------- logos ---------- */
   function ermLogo(s = 36) {
-    return `<svg width="${s}" height="${s}" viewBox="0 0 48 48" aria-label="ERM Marketing"><defs><linearGradient id="ermg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2f6fed"/><stop offset="1" stop-color="#1fa2b8"/></linearGradient></defs><rect width="48" height="48" rx="14" fill="url(#ermg)"/><path d="M15 14h18v4.2H19.4v4.1H31v4.1H19.4v4.4H33V35H15z" fill="#fff"/><path d="M33 12l4 4-4 4" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" transform="translate(-1 -1)"/></svg>`;
+    return `<svg width="${s}" height="${s}" viewBox="0 0 64 64" aria-label="ERM Marketing"><defs><linearGradient id="ermg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2f6fed"/><stop offset="1" stop-color="#1fa2b8"/></linearGradient></defs><rect width="64" height="64" rx="18" fill="url(#ermg)"/><rect x="15" y="12" width="7" height="38" rx="3.5" fill="#fff"/><rect x="18" y="12" width="21" height="7" rx="3.5" fill="#fff"/><path d="M37 8l13 7.5L37 23z" fill="#fff" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/><path d="M22 28h13.5a3.5 3.5 0 0 1 0 7H22z" fill="#fff" opacity=".85"/><path d="M22 43h6.5a3.5 3.5 0 0 1 0 7H22z" fill="#fff" opacity=".65"/></svg>`;
   }
   function clientLogo(c, s = 44) {
     if (c.logoUrl) return `<img class="clogo" src="${esc(c.logoUrl)}" width="${s}" height="${s}" alt="${esc(c.name)}" style="border-radius:${s * .3}px;object-fit:cover">`;

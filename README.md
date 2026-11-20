@@ -24,3 +24,6 @@ Click the chips on the login page to auto-fill. In Admin → Clients, **Portal**
 
 ## Next
 See [docs/UPGRADE-PLAN.md](docs/UPGRADE-PLAN.md) (Supabase + Vercel) and [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) (what each platform API really allows).
+
+## Logo
+Files in `assets/logo/`: `erm-mark` (icon), `erm-logo-horizontal-dark` / `-light` — each as SVG (scalable, for print/web) and PNG. The mark is an "E" built from three ascending bars with an arrow tip: ERM + growth.
