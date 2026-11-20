@@ -149,18 +149,18 @@
   }
   let gid = 0;
   /* series: [{name,color,data:[],dashed?,area?}]  labels: [] */
-  function lineChart({ series, labels, height = 280, light = false, area = true, yFmt = fmtN, tipFmt = fmtFull, id }) {
+  function lineChart({ series, labels, height = 280, light = false, area = true, yFmt = fmtN, tipFmt = fmtFull, id, yMin = 0 }) {
     const W = 760, H = height, L = 46, R = 14, T = 14, B = 28;
     const iw = W - L - R, ih = H - T - B; const n = labels.length;
-    const max = Math.max(1, ...series.flatMap(s => s.data)) * 1.1;
-    const X = i => L + (n === 1 ? iw / 2 : i * iw / (n - 1)), Y = v => T + ih - (v / max) * ih;
+    const dmax = Math.max(1, ...series.flatMap(s => s.data)), max = yMin ? dmax + (dmax - yMin) * .12 : dmax * 1.1;
+    const rngY = (max - yMin) || 1; const X = i => L + (n === 1 ? iw / 2 : i * iw / (n - 1)), Y = v => T + ih - ((v - yMin) / rngY) * ih;
     const grid = light ? '#e5e7f0' : 'rgba(128,140,170,.2)', txt = light ? '#6b7090' : '#8b90b0';
     const uid_ = 'g' + (++gid);
     let o = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img"><defs>`;
     series.forEach((s, k) => { o += `<linearGradient id="${uid_}a${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s.color}" stop-opacity="${light ? .25 : .38}"/><stop offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient>`; });
     o += `<linearGradient id="${uid_}s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--a1)"/><stop offset="1" style="stop-color:var(--a2)"/></linearGradient></defs>`;
     for (let g = 0; g <= 4; g++) {
-      const y = T + ih * g / 4; o += `<line x1="${L}" x2="${W - R}" y1="${y}" y2="${y}" stroke="${grid}" stroke-dasharray="${g ? '3 5' : ''}"/><text x="${L - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="${txt}">${yFmt(max * (1 - g / 4))}</text>`;
+      const y = T + ih * g / 4; o += `<line x1="${L}" x2="${W - R}" y1="${y}" y2="${y}" stroke="${grid}" stroke-dasharray="${g ? '3 5' : ''}"/><text x="${L - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="${txt}">${yFmt(yMin + rngY * (1 - g / 4))}</text>`;
     }
     const step = Math.max(1, Math.ceil(n / 7));
     labels.forEach((l, i) => { if (i % step === 0 || i === n - 1) o += `<text x="${X(i)}" y="${H - 8}" text-anchor="${i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'}" font-size="11" fill="${txt}">${esc(l)}</text>`; });

@@ -5,7 +5,7 @@
   const st = { preset: '30d', from: addDays(TODAY, -29), to: TODAY, platform: 'all', split: false, sort: 'views', cplat: 'all' };
   let timer = null, countdown = 60;
 
-  const NAV = [['overview', 'Overview', 'grid'], ['content', 'Content', 'play'], ['goals', 'Goals', 'target'], ['approvals', 'Approvals', 'checksq'], ['messages', 'Messages', 'comment']];
+  const NAV = [['overview', 'Overview', 'grid'], ['audience', 'Audience', 'users'], ['content', 'Content', 'play'], ['goals', 'Goals', 'target'], ['approvals', 'Approvals', 'checksq'], ['messages', 'Messages', 'comment']];
 
   const range = () => { if (st.preset === 'custom') return { from: st.from, to: st.to }; return Metrics.presetRange(st.preset); };
   const growthChip = (g, k) => `<span class="gchip ${g >= 0 ? 'up' : 'dn'}" ${k ? `data-gkey="${k}"` : ''}>${ico(g >= 0 ? 'up' : 'down', 12)}${Math.abs(g).toFixed(1)}%</span>`;
@@ -33,12 +33,14 @@
     const prevLabel = isToday ? 'vs yesterday' : `vs previous ${q.len} days`;
     const metric = (k, label, icon, v, fmt, g) => `<div class="glass tile"><div class="tile-h"><span class="ti">${ico(icon, 16)}</span>${label}</div><div class="tile-v">${cnt(v, fmt, 'v:' + k)}</div>${growthChip(g, 'g:' + k)}</div>`;
     const gr = k => q.growth(k);
-    let o = `<div class="page-h"><div><h1>Performance <span class="grad">overview</span></h1><p class="muted">${isToday ? 'Today so far' : rangeLabel(q)} · ${plats.length === conn.length ? 'all platforms' : PLAT[plats[0]].name}</p></div>${liveBadge()}</div>${toolbar(c, ctx)}`;
+    let o = `<div class="page-h"><div><h1>Performance <span class="grad">overview</span></h1><p class="muted">${isToday ? 'Today so far' : rangeLabel(q)} · ${plats.length === conn.length ? 'all platforms' : PLAT[plats[0]].name}</p></div><div class="actions"><button class="btn sm" id="csv">${ico('download', 14)} CSV</button>${liveBadge()}</div></div>${toolbar(c, ctx)}`;
 
     // hero
     o += `<div class="glass hero"><div class="hero-l"><div class="eyebrow">${ico('eye', 14)} Total views</div><div class="hero-n">${cnt(T.views, 'full', 'v:hero')}</div><div class="hero-g">${growthChip(gr('views'), 'g:hero')}<span class="muted">${prevLabel}</span></div>
       <div class="hero-sub"><div><b>${cnt(T.reach, 'k', 'v:hreach')}</b><span>Reach</span></div><div><b>${cnt(T.engagement, 'pct', 'v:hen')}</b><span>Engagement</span></div><div><b>+${cnt(T.followers, 'full', 'v:hfol')}</b><span>New followers</span></div></div></div>
       <div class="hero-r" id="ch-hero">${heroChart(c, q, plats)}</div></div>`;
+
+    o += Insights.pulseCard(c, plats) + Insights.milestoneStrip(c);
 
     // platform cards
     o += `<div class="grid plat-grid">${conn.map(p => { const t = qa.byPlatform[p]; const g = qa.pgrowth(p, 'views'); const spark = qa.daily.map((_, i) => 0); const sp = Metrics.query(c.id, { from: addDays(TODAY, -13), to: TODAY, platforms: [p] }).daily.map(d => d.views);
@@ -85,7 +87,7 @@
   const medal = i => ['🥇', '🥈', '🥉'][i - 1] || '';
   function postCard(p, rank) {
     const eng = (p.likes + p.comments + p.shares + p.saves) / p.views * 100;
-    return `<article class="glass post"><div class="thumb" style="background:linear-gradient(135deg,hsl(${p.hue},75%,58%),hsl(${(p.hue + 55) % 360},70%,38%))"><span class="emoji">${p.emoji}</span>${rank ? `<span class="rank">${medal(rank)} #${rank}</span>` : ''}<span class="tplat">${platIcon(p.platform, 28)}</span><span class="play">${ico('play', 16)}</span></div>
+    return `<article class="glass post" data-post="${p.id}" tabindex="0" role="button" aria-label="Open post details"><div class="thumb" style="background:linear-gradient(135deg,hsl(${p.hue},75%,58%),hsl(${(p.hue + 55) % 360},70%,38%))"><span class="emoji">${p.emoji}</span>${rank ? `<span class="rank">${medal(rank)} #${rank}</span>` : ''}<span class="tplat">${platIcon(p.platform, 28)}</span><span class="play">${ico('play', 16)}</span></div>
       <div class="post-b"><b>${esc(p.title)}</b><small class="muted">${PLAT[p.platform].name} · ${fmtDate(p.date)}</small><div class="post-s"><span>${ico('eye', 13)}${fmtN(p.views)}</span><span>${ico('heart', 13)}${fmtN(p.likes)}</span><span>${ico('comment', 13)}${fmtN(p.comments)}</span><span class="eng">${eng.toFixed(1)}%</span></div></div></article>`;
   }
   const empty = (t, s) => `<div class="empty glass"><div class="e-ico">${ico('image', 28)}</div><b>${t}</b><p class="muted">${s}</p></div>`;
@@ -95,6 +97,13 @@
     const pace = g.goal.metric === 'engagement' ? g.current / g.goal.target * 100 : (g.current / (d.getDate() / dim)) / g.goal.target * 100;
     const on = pace >= 98;
     return `<div class="glass goal"><div class="goal-h"><span>${esc(g.goal.label)}</span><em class="${on ? 'up' : 'warn'}">${on ? 'On track' : 'Needs a push'}</em></div><div class="goal-v"><b>${fmt(g.current)}</b><span>of ${fmt(g.goal.target)}</span></div><div class="bar"><i style="width:${g.pct}%"></i><span class="pace" style="left:${Math.min(100, d.getDate() / dim * 100)}%"></span></div><div class="goal-f"><span>${g.pct.toFixed(0)}% complete</span><span class="muted">Projected ${Math.round(pace)}%</span></div></div>`;
+  }
+
+  /* ---------- Audience ---------- */
+  function audienceHTML(c, ctx) {
+    const r = range(), conn = Metrics.connected(c.id), plats = st.platform === 'all' ? conn : [st.platform];
+    const q = Metrics.query(c.id, { ...r, platforms: plats });
+    return `<div class="page-h"><div><h1>Audience &amp; <span class="grad">reach</span></h1><p class="muted">Who is watching, where views come from, and how you're growing · ${rangeLabel(q)}</p></div><div class="actions"><button class="btn sm" id="csv">${ico('download', 14)} CSV</button></div></div>${toolbar(c, ctx)}${Insights.audienceBody(c, q, plats)}`;
   }
 
   /* ---------- Content ---------- */
@@ -144,7 +153,7 @@
   function render(main, c, sub, ctx = {}) {
     clearInterval(timer); main.dataset.sub = sub;
     const draw = () => {
-      main.innerHTML = `<div class="view">${{ overview: overviewHTML, content: contentHTML, goals: goalsHTML, approvals: approvalsHTML, messages: messagesHTML }[sub](c, ctx)}</div>`;
+      main.innerHTML = `<div class="view">${{ overview: overviewHTML, audience: audienceHTML, content: contentHTML, goals: goalsHTML, approvals: approvalsHTML, messages: messagesHTML }[sub](c, ctx)}</div>`;
       U.runCounters(main); bind();
       const m = $('#msgs', main); if (m) m.scrollTop = m.scrollHeight;
     };
@@ -168,14 +177,17 @@
       }));
       const mf = $('#msg-f', main); if (mf) mf.onsubmit = e => { e.preventDefault(); const v = $('#msg-i', main).value.trim(); if (!v) return; Store.add('messages', { cid: c.id, from: ctx.admin ? 'agency' : 'client', text: v, date: Date.now() }); if (!ctx.admin) Store.notify(`New message from ${c.name}`, 'comment'); draw(); };
       const rf = $('#req-f', main); if (rf) rf.onsubmit = e => { e.preventDefault(); const f = Object.fromEntries(new FormData(rf)); Store.add('requests', { cid: c.id, ...f, status: 'New', ts: Date.now() }); Store.add('tasks', { cid: c.id, title: `Client request: ${f.title}`, assignee: 'u2', due: f.due || addDays(TODAY, 7), status: 'todo', priority: 'med' }); Store.notify(`${c.name} requested: ${f.title}`, 'send'); Store.log(c.id, `Content request: ${f.title}`, 'send'); toast('Request sent! We\'ll be in touch.'); draw(); };
+      $$('[data-post]', main).forEach(el => { const open = () => Insights.postModal(el.dataset.post, c); el.onclick = open; el.onkeydown = e => { if (e.key === 'Enter') open(); }; });
+      const cs = $('#csv', main); if (cs) cs.onclick = () => { const rr = range(), cn = Metrics.connected(c.id), pl = st.platform === 'all' ? cn : [st.platform]; Insights.exportCSV(c, Metrics.query(c.id, { ...rr, platforms: pl }), pl); };
       const eg = $('#edit-goals', main); if (eg) eg.onclick = () => editGoals(c, draw);
     };
     draw();
 
+    if (sub === 'overview' && !ctx.admin) Insights.logView(c.id);
     if (sub === 'overview') {
       countdown = 60;
       timer = setInterval(() => {
-        countdown--; const t = $('#live-t'); if (t) t.textContent = `· updates in ${countdown}s`;
+        countdown--; if (countdown % 10 === 0) { const cn = Metrics.connected(c.id); Insights.refreshPulse(main, c, st.platform === 'all' ? cn : [st.platform]); } const t = $('#live-t'); if (t) t.textContent = `· updates in ${countdown}s`;
         if (countdown <= 0) { countdown = 60; Metrics.tick(); liveUpdate(main, c); }
       }, 1000);
     }

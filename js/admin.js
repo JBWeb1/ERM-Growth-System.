@@ -6,7 +6,7 @@
   const DB = () => Store.db;
 
   const NAV = [
-    ['dashboard', 'Dashboard', 'grid', ['admin', 'team']], ['clients', 'Clients', 'users', ['admin', 'team']], ['leads', 'Leads & pipeline', 'target', ['admin', 'team']],
+    ['dashboard', 'Dashboard', 'grid', ['admin', 'team']], ['clients', 'Clients', 'users', ['admin', 'team']], ['analytics', 'Analytics', 'trend', ['admin', 'team']], ['leads', 'Leads & pipeline', 'target', ['admin', 'team']],
     ['tasks', 'Tasks & calendar', 'checksq', ['admin', 'team']], ['invoices', 'Invoices', 'dollar', ['admin']], ['proposals', 'Proposals', 'file', ['admin']],
     ['messages', 'Templates & comms', 'mail', ['admin', 'team']], ['reports', 'Reports', 'bars', ['admin', 'team']], ['settings', 'Settings', 'settings', ['admin']]
   ];
@@ -300,8 +300,8 @@
     if (nav && !nav[3].includes(user.role)) { main.innerHTML = `<div class="view">${empty('No access', 'Your role (' + user.role + ') can\'t open this section.')}</div>`; return; }
     let html;
     if (page === 'client') html = clientDetail(parts[1], parts[2] || 'overview');
-    else html = { dashboard, clients, leads, tasks, invoices, proposals, messages: messagesPage, reports: reportsPage, settings }[page]?.() || empty('Not found', '');
-    main.innerHTML = `<div class="view">${html}</div>`; U.runCounters(main); bind(main, parts);
+    else html = { dashboard, clients, analytics: Insights.analyticsHTML, leads, tasks, invoices, proposals, messages: messagesPage, reports: reportsPage, settings }[page]?.() || empty('Not found', '');
+    main.innerHTML = `<div class="view">${html}</div>`; U.runCounters(main); bind(main, parts); if (page === 'analytics') Insights.bindAnalytics(main);
   }
 
   function bind(main, parts) {

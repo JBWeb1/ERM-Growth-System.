@@ -19,6 +19,9 @@ Click the chips on the login page to auto-fill. In Admin → Clients, **Portal**
 - **Reports**: pick range / platforms / sections → branded preview with editable wins & next steps → PDF (print dialog), PNG image, WhatsApp share, mailto, copy summary, copy email HTML, schedule weekly/monthly.
 - **Admin CRM**: dashboard (clients, MRR, leads, views, tasks), clients (profile, accounts + OAuth connect flow, content, billing, comms, timeline, notes, status), drag-and-drop Kanban pipeline with one-click convert, tasks + content calendar, multi-currency invoices (USD/ZAR, recurring retainers, printable), proposals with tracking, email/WhatsApp templates + comms log, roles & permissions, global search (`/`), notifications, white-label settings.
 
+## Deeper view tracking
+Audience tab (followers, age, gender, countries, cities, discovery sources, platform comparison), click-through post drill-down (48h velocity, retention curve, vs-average), live pulse, milestones & viral alerts, CSV export; Admin → Analytics (all-client leaderboard, portal-visit tracking, link tracker). Sample data in Phase 1.
+
 ## Structure
 `index.html` · `css/styles.css` · `js/core.js` (utils, SVG charts) · `js/data.js` (**data layer** — `Metrics` provider + `Store`) · `js/reports.js` · `js/portal.js` · `js/admin.js` · `js/app.js` (auth/router) · `docs/` · `supabase/schema.sql`
 
