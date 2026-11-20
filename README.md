@@ -27,3 +27,6 @@ See [docs/UPGRADE-PLAN.md](docs/UPGRADE-PLAN.md) (Supabase + Vercel) and [docs/I
 
 ## Logo
 Files in `assets/logo/`: `erm-mark` (icon), `erm-logo-horizontal-dark` / `-light` — each as SVG (scalable, for print/web) and PNG. The mark is an "E" built from three ascending bars with an arrow tip: ERM + growth.
+
+## Colour themes
+Seven professional themes — Corporate Navy (default), Executive White, Ocean Light, Emerald Finance, Charcoal & Gold, Slate Indigo, Royal Burgundy. Switch with the ★ button in the top bar (login page, admin and client portal). Admins set the default for everyone in Settings → Branding. In a client portal, a checkbox toggles between the client's own brand colours and the theme colours.

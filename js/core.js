@@ -154,11 +154,11 @@
     const iw = W - L - R, ih = H - T - B; const n = labels.length;
     const max = Math.max(1, ...series.flatMap(s => s.data)) * 1.1;
     const X = i => L + (n === 1 ? iw / 2 : i * iw / (n - 1)), Y = v => T + ih - (v / max) * ih;
-    const grid = light ? '#e5e7f0' : 'rgba(255,255,255,.07)', txt = light ? '#6b7090' : '#8b90b0';
+    const grid = light ? '#e5e7f0' : 'rgba(128,140,170,.2)', txt = light ? '#6b7090' : '#8b90b0';
     const uid_ = 'g' + (++gid);
     let o = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img"><defs>`;
     series.forEach((s, k) => { o += `<linearGradient id="${uid_}a${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s.color}" stop-opacity="${light ? .25 : .38}"/><stop offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient>`; });
-    o += `<linearGradient id="${uid_}s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2f6fed"/><stop offset="1" stop-color="#1fa2b8"/></linearGradient></defs>`;
+    o += `<linearGradient id="${uid_}s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--a1)"/><stop offset="1" style="stop-color:var(--a2)"/></linearGradient></defs>`;
     for (let g = 0; g <= 4; g++) {
       const y = T + ih * g / 4; o += `<line x1="${L}" x2="${W - R}" y1="${y}" y2="${y}" stroke="${grid}" stroke-dasharray="${g ? '3 5' : ''}"/><text x="${L - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="${txt}">${yFmt(max * (1 - g / 4))}</text>`;
     }
@@ -179,7 +179,7 @@
         const tip = `<b>${esc(labels[i])}</b>` + series.map(s => `<div><i style="background:${s.color}"></i>${esc(s.name)} <b>${tipFmt(s.data[i])}</b></div>`).join('');
         o += `<rect class="hit" x="${X(i) - cw / 2}" y="${T}" width="${cw}" height="${ih}" fill="transparent" data-tip="${esc(tip)}" data-x="${X(i)}"/>`;
       }
-      o += `<line class="cursor" x1="0" x2="0" y1="${T}" y2="${T + ih}" stroke="rgba(255,255,255,.3)" stroke-dasharray="3 4" style="display:none"/>`;
+      o += `<line class="cursor" x1="0" x2="0" y1="${T}" y2="${T + ih}" stroke="rgba(128,140,170,.55)" stroke-dasharray="3 4" style="display:none"/>`;
     }
     return o + '</svg>';
   }
@@ -193,7 +193,7 @@
 
   function donut({ parts, size = 190, thick = 26, center = '', light = false }) {
     const r = (size - thick) / 2, c = 2 * Math.PI * r, tot = parts.reduce((a, p) => a + p.value, 0) || 1;
-    let off = 0; const track = light ? '#eceef7' : 'rgba(255,255,255,.07)';
+    let off = 0; const track = light ? '#eceef7' : 'rgba(128,140,170,.18)';
     let o = `<svg class="donut" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${track}" stroke-width="${thick}"/>`;
     parts.forEach(p => {
       const len = p.value / tot * c, gap = parts.length > 1 ? 3 : 0;
@@ -207,13 +207,13 @@
   function barChart({ items, height = 200, light = false, fmt = fmtN, color = '#4a86f2' }) {
     const W = 520, H = height, L = 8, B = 26, T = 20; const mx = Math.max(1, ...items.map(i => i.value)) * 1.08;
     const bw = (W - L * 2) / items.length; const txt = light ? '#6b7090' : '#8b90b0';
-    let o = `<svg class="chart" viewBox="0 0 ${W} ${H}"><defs><linearGradient id="bg${++gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1fa2b8"/><stop offset="1" stop-color="#2f6fed"/></linearGradient></defs>`;
+    let o = `<svg class="chart" viewBox="0 0 ${W} ${H}"><defs><linearGradient id="bg${++gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--a2)"/><stop offset="1" style="stop-color:var(--a1)"/></linearGradient></defs>`;
     items.forEach((it, i) => {
       const h = (it.value / mx) * (H - B - T), x = L + i * bw + bw * .18, w = bw * .64, y = H - B - h;
       const fill = it.color || (light ? color : `url(#bg${gid})`);
       o += `<rect class="bchart" x="${x}" y="${y}" width="${w}" height="${h}" rx="7" fill="${fill}" style="animation-delay:${i * 60}ms" ${light ? '' : `data-tip="${esc(`<b>${esc(it.label)}</b><div>${fmt(it.value)}</div>`)}"`}/>`;
       o += `<text x="${x + w / 2}" y="${H - 8}" text-anchor="middle" font-size="11" fill="${txt}">${esc(it.label)}</text>`;
-      o += `<text x="${x + w / 2}" y="${y - 6}" text-anchor="middle" font-size="11" font-weight="600" fill="${light ? '#2a2d4a' : '#dfe2ff'}">${fmt(it.value)}</text>`;
+      o += `<text x="${x + w / 2}" y="${y - 6}" text-anchor="middle" font-size="11" font-weight="600" fill="${light ? '#2a2d4a' : 'currentColor'}">${fmt(it.value)}</text>`;
     });
     return o + '</svg>';
   }
@@ -227,7 +227,7 @@
       row.forEach((v, si) => {
         const k = v / mx; const a = 0.08 + k * .92;
         const tip = `<b>${days[di]} · ${slots[si]}</b><div>Avg ${fmtN(v)} views / post</div>`;
-        o += `<span class="hc ${k > .82 ? 'top' : ''}" style="background:rgba(${light ? '47,111,237' : '47,111,237'},${a.toFixed(2)})" ${light ? '' : `data-tip="${esc(tip)}"`}></span>`;
+        o += `<span class="hc ${k > .82 ? 'top' : ''}" style="background:rgba(${light ? '47,111,237' : 'var(--a1-rgb)'},${a.toFixed(2)})" ${light ? '' : `data-tip="${esc(tip)}"`}></span>`;
       });
     });
     return o + '</div>';

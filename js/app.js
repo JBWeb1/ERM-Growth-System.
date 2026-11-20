@@ -20,9 +20,32 @@
     return null;
   }
 
+  /* ---------- themes ---------- */
+  const THEMES = [
+    ['navy', 'Corporate Navy', 'Dark · blue & teal', '#0a0f1c', '#2f6fed'], ['light', 'Executive White', 'Light · clean & crisp', '#f3f5fa', '#2457d6'],
+    ['ocean', 'Ocean Light', 'Light · teal & sky', '#eef6fa', '#0b7fb0'], ['emerald', 'Emerald Finance', 'Dark · green & aqua', '#07130f', '#12a37a'],
+    ['gold', 'Charcoal & Gold', 'Dark · premium gold', '#101012', '#c8a24a'], ['indigo', 'Slate Indigo', 'Dark · calm indigo', '#0c0f20', '#4f5bd5'],
+    ['burgundy', 'Royal Burgundy', 'Dark · wine & rose', '#150b11', '#a62f50']
+  ];
+  const getTheme = () => { let t = null; try { t = localStorage.getItem('erm.theme'); } catch (e) { } return THEMES.some(x => x[0] === t) ? t : (Store.db.settings.theme || 'navy'); };
+  const hex2rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const onColor = h => { const [r, g, b] = hex2rgb(h); return (0.299 * r + 0.587 * g + 0.114 * b) > 165 ? '#1a1405' : '#ffffff'; };
   function applyBrand(client) {
-    const s = Store.db.settings, r = document.documentElement.style;
-    r.setProperty('--a1', client ? client.color : s.accent1); r.setProperty('--a2', client ? client.color2 : s.accent2);
+    const t = getTheme(), root = document.documentElement, st = root.style;
+    root.dataset.theme = t === 'navy' ? '' : t;
+    ['--a1', '--a2', '--c1', '--on'].forEach(v => st.setProperty(v, ''));
+    let brandOn = true; try { brandOn = localStorage.getItem('erm.brand') !== 'off'; } catch (e) { }
+    if (client && brandOn) { st.setProperty('--a1', client.color); st.setProperty('--a2', client.color2); st.setProperty('--c1', client.color); st.setProperty('--on', onColor(client.color)); }
+    const a1 = getComputedStyle(root).getPropertyValue('--a1').trim(); if (/^#[0-9a-f]{6}$/i.test(a1)) st.setProperty('--a1-rgb', hex2rgb(a1).join(','));
+    const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = getComputedStyle(root).getPropertyValue('--bg').trim();
+  }
+  const paletteHTML = (client) => { const cur = getTheme(); let brandOn = true; try { brandOn = localStorage.getItem('erm.brand') !== 'off'; } catch (e) { } return `<div class="pal"><button class="icon-btn" id="pal-btn" title="Colour theme" aria-label="Colour theme">${ico('star', 20)}</button><div class="pal-pop glass" id="pal-pop" hidden><b class="sm">Colour theme</b><div class="pal-grid" style="margin-top:8px">${THEMES.map(([id, n, d, bg, ac]) => `<button class="swatch ${id === cur ? 'on' : ''}" data-theme-pick="${id}"><i style="background:linear-gradient(135deg,${bg} 50%,${ac} 50%)"></i><span>${n}<small>${d}</small></span></button>`).join('')}</div>${client ? `<label class="check sm" style="margin-top:12px"><input type="checkbox" id="brand-on" ${brandOn ? 'checked' : ''}><span>Use ${esc(client.name)} brand colours</span></label>` : ''}</div></div>`; };
+  function bindPalette(client) {
+    const b = $('#pal-btn'), pop = $('#pal-pop'); if (!b) return;
+    b.onclick = e => { e.stopPropagation(); pop.hidden = !pop.hidden; };
+    $$('[data-theme-pick]', pop).forEach(x => x.onclick = () => { try { localStorage.setItem('erm.theme', x.dataset.themePick); } catch (e) { } applyBrand(client); $$('.swatch', pop).forEach(s => s.classList.toggle('on', s === x)); });
+    const bo = $('#brand-on'); if (bo) bo.onchange = () => { try { localStorage.setItem('erm.brand', bo.checked ? 'on' : 'off'); } catch (e) { } applyBrand(client); };
+    document.addEventListener('click', ev => { if (!ev.target.closest('.pal')) pop.hidden = true; });
   }
 
   /* ---------- login page ---------- */
@@ -42,7 +65,7 @@
           <div class="chips"><button class="chip" data-e="admin@ermmarketing.co" data-p="admin123">👑 Admin</button><button class="chip" data-e="team@ermmarketing.co" data-p="team123">🧑‍💻 Team member</button></div>
           <div class="chips">${D.clients.map(c => `<button class="chip" data-e="${esc(c.login.email)}" data-p="${esc(c.login.password)}"><span class="dot" style="background:${c.color}"></span>${esc(c.name)}</button>`).join('')}</div>
           <small class="muted">Client password: <code>demo123</code> · Demo-only login, checked in your browser.</small></div></section></div>`;
-    U.runCounters(app);
+    U.runCounters(app); app.insertAdjacentHTML('beforeend', `<div class="login-pal">${paletteHTML()}</div>`); bindPalette(null);
     $$('[data-e]', app).forEach(b => b.onclick = () => { $('#le').value = b.dataset.e; $('#lp').value = b.dataset.p; });
     $('#lf').onsubmit = e => { e.preventDefault(); const s = login($('#le').value, $('#lp').value); if (!s) { const er = $('#lerr'); er.hidden = false; er.textContent = 'Incorrect email or password.'; return; } session = s; writeSession(s); location.hash = s.role === 'client' ? '#/portal/overview' : '#/admin/dashboard'; };
   }
@@ -65,9 +88,9 @@
     shell({
       brandHTML: `${ermLogo(38)}<div><b>${esc(D.settings.agency)}</b><small>${esc(D.settings.tagline)}</small></div>`, navHTML: nav, foot: `<small class="muted">ERM-Growth System · v1 demo</small>`,
       topLeft: `<div class="search"><span>${ico('search', 16)}</span><input id="gs" placeholder="Search clients, leads, invoices…  ( / )" autocomplete="off"><div class="results glass" id="gres" hidden></div></div>`,
-      topRight: `<div class="pop-wrap"><button class="icon-btn bell" id="bell" aria-label="Notifications">${ico('bell', 20)}${unread ? `<b class="dot-n">${unread}</b>` : ''}</button><div class="pop glass" id="npop" hidden></div></div>${userChip(s)}`
+      topRight: `${paletteHTML()}<div class="pop-wrap"><button class="icon-btn bell" id="bell" aria-label="Notifications">${ico('bell', 20)}${unread ? `<b class="dot-n">${unread}</b>` : ''}</button><div class="pop glass" id="npop" hidden></div></div>${userChip(s)}`
     });
-    bindTop();
+    bindTop(); bindPalette(null);
     const gs = $('#gs'), gr = $('#gres');
     gs.oninput = () => { const q = gs.value.trim().toLowerCase(); if (q.length < 2) { gr.hidden = true; return; } const hits = [];
       D.clients.forEach(c => (c.name + c.contact.name + c.industry).toLowerCase().includes(q) && hits.push(['Client', c.name, c.status, '#/admin/client/' + c.id]));
@@ -92,9 +115,9 @@
       client: c, brandHTML: `${clientLogo(c, 42)}<div><b>${esc(c.name)}</b><small>Client dashboard</small></div>`, navHTML: nav,
       foot: D.settings.whiteLabel ? '' : `<div class="powered">${ermLogo(22)}<small>Powered by <b>ERM Marketing</b><br>${esc(D.settings.tagline)}</small></div>`,
       topLeft: admin ? `<div class="viewas">${ico('eye', 16)} Viewing as <b>${esc(c.name)}</b></div>` : `<div class="hello">Hi ${esc(c.contact.name.replace(/^Dr\.\s*/, '').split(' ')[0])} 👋</div>`,
-      topRight: `<button class="btn sm primary hide-m" id="p-rep">${ico('download', 14)} Report</button>${admin ? `<button class="btn sm" id="exit-view">${ico('x', 14)} Exit client view</button>` : userChip(session)}`
+      topRight: `${paletteHTML(c)}<button class="btn sm primary hide-m" id="p-rep">${ico('download', 14)} Report</button>${admin ? `<button class="btn sm" id="exit-view">${ico('x', 14)} Exit client view</button>` : userChip(session)}`
     });
-    bindTop(); const r = $('#p-rep'); if (r) r.onclick = () => Reports.openBuilder(c.id);
+    bindTop(); bindPalette(c); const r = $('#p-rep'); if (r) r.onclick = () => Reports.openBuilder(c.id);
     const ex = $('#exit-view'); if (ex) ex.onclick = () => { setViewAs(null); location.hash = '#/admin/client/' + c.id; };
     return $('#main');
   }
@@ -123,6 +146,6 @@
 
   document.addEventListener('erm:refresh', () => route(true));
   addEventListener('hashchange', () => route(false));
-  w.App = { viewAs(cid) { setViewAs(cid); location.hash = '#/portal/overview'; }, applyBrand: () => applyBrand(), route };
+  w.App = { THEMES, getTheme, viewAs(cid) { setViewAs(cid); location.hash = '#/portal/overview'; }, applyBrand: () => applyBrand(), route };
   route(false);
 })(window);

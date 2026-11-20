@@ -9,10 +9,10 @@
   function viewsSeries(cid, q, plats) {
     if (q.len === 1 && q.to === TODAY) {
       const h = Metrics.hourly(cid, plats);
-      return { labels: h.map((_, i) => i + ':00'), series: [{ name: 'Views', color: '#4a86f2', data: h }], hourly: true };
+      return { labels: h.map((_, i) => i + ':00'), series: [{ name: 'Views', color: 'var(--c1)', data: h }], hourly: true };
     }
     const labels = q.daily.map(d => fmtDate(d.d));
-    const series = [{ name: 'Views', color: '#4a86f2', data: q.daily.map(d => d.views) }];
+    const series = [{ name: 'Views', color: 'var(--c1)', data: q.daily.map(d => d.views) }];
     return { labels, series, prevData: q.prev.daily.map(d => d.views) };
   }
 

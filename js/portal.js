@@ -70,15 +70,15 @@
 
   function heroChart(c, q, plats) {
     const vs = Reports.viewsSeries(c.id, q, plats);
-    return U.lineChart({ series: [{ name: 'Views', color: '#5b9bff', data: vs.series[0].data }], labels: vs.labels, height: 250 });
+    return U.lineChart({ series: [{ name: 'Views', color: 'var(--c1)', data: vs.series[0].data }], labels: vs.labels, height: 250 });
   }
   function viewsChart(c, q, plats) {
     const vs = Reports.viewsSeries(c.id, q, plats);
     if (st.split && plats.length > 1) {
       return U.lineChart({ series: plats.map(p => ({ name: PLAT[p].name, color: PLAT[p].color, data: q.daily.map((_, i) => 0) })).map((s, i) => ({ ...s, data: Metrics.query(c.id, { from: q.from, to: q.to, platforms: [plats[i]] }).daily.map(d => d.views) })), labels: vs.labels, height: 300, area: false });
     }
-    const ser = [{ name: 'This period', color: '#5b9bff', data: vs.series[0].data }];
-    if (vs.prevData) ser.push({ name: 'Previous period', color: '#9aa6bd', dashed: true, data: vs.prevData });
+    const ser = [{ name: 'This period', color: 'var(--c1)', data: vs.series[0].data }];
+    if (vs.prevData) ser.push({ name: 'Previous period', color: 'rgba(128,140,170,.9)', dashed: true, data: vs.prevData });
     return U.lineChart({ series: ser, labels: vs.labels, height: 300 });
   }
 
