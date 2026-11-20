@@ -9,10 +9,10 @@
   function viewsSeries(cid, q, plats) {
     if (q.len === 1 && q.to === TODAY) {
       const h = Metrics.hourly(cid, plats);
-      return { labels: h.map((_, i) => i + ':00'), series: [{ name: 'Views', color: '#6d7cff', data: h }], hourly: true };
+      return { labels: h.map((_, i) => i + ':00'), series: [{ name: 'Views', color: '#4a86f2', data: h }], hourly: true };
     }
     const labels = q.daily.map(d => fmtDate(d.d));
-    const series = [{ name: 'Views', color: '#6d7cff', data: q.daily.map(d => d.views) }];
+    const series = [{ name: 'Views', color: '#4a86f2', data: q.daily.map(d => d.views) }];
     return { labels, series, prevData: q.prev.daily.map(d => d.views) };
   }
 
@@ -61,8 +61,8 @@
   function html(cid, opts, edit = true) {
     const c = Store.client(cid), q = Metrics.query(cid, opts), S = opts.sections, T = q.totals, ins = insights(cid, q, opts), cfg = Store.db.settings;
     const vs = viewsSeries(cid, q, opts.platforms);
-    const ser = [{ name: 'This period', color: '#5b5bf0', data: vs.series[0].data }];
-    if (vs.prevData) ser.push({ name: 'Previous', color: '#a3a7c4', dashed: true, data: vs.prevData });
+    const ser = [{ name: 'This period', color: '#2f6fed', data: vs.series[0].data }];
+    if (vs.prevData) ser.push({ name: 'Previous', color: '#a3adc2', dashed: true, data: vs.prevData });
     const stat = (label, v, k, icon) => `<div class="r-stat"><span>${ico(icon, 14)} ${label}</span><b>${v}</b>${k !== null ? `<em class="${k >= 0 ? 'up' : 'dn'}">${sign(k)}</em>` : ''}</div>`;
     const donutParts = q.plats.map(p => ({ name: PLAT[p].name, value: q.byPlatform[p].views, color: PLAT[p].color === '#25f4ee' ? '#00b8b0' : PLAT[p].color }));
     let o = `<div class="report" id="report-doc" style="--b1:${c.color};--b2:${c.color2}">
@@ -86,7 +86,7 @@
     const ins = insights(cid, q, opts); let wins = ins.wins, next = ins.next;
     if (root) { const a = $$('.r-wins li', root).map(x => x.innerText.trim()).filter(Boolean), b = $$('.r-next li', root).map(x => x.innerText.trim()).filter(Boolean); if (a.length) wins = a; if (b.length) next = b; }
     const cell = (l, v, g) => `<td style="padding:12px;background:#f4f5fb;border-radius:10px;text-align:center"><div style="font-size:12px;color:#6b7090">${l}</div><div style="font-size:22px;font-weight:700;color:#1b1d3a">${v}</div><div style="font-size:12px;color:${g >= 0 ? '#12a150' : '#d93c3c'}">${sign(g)}</div></td><td width="8"></td>`;
-    return `<div style="font-family:Inter,Segoe UI,Arial,sans-serif;max-width:600px;margin:auto;color:#1b1d3a"><div style="background:linear-gradient(135deg,#3b82f6,#8b5cf6);padding:24px;border-radius:14px 14px 0 0;color:#fff"><div style="font-size:13px;opacity:.85">${esc(Store.db.settings.agency)} · ${esc(Store.db.settings.tagline)}</div><div style="font-size:22px;font-weight:700;margin-top:6px">${esc(c.name)} — Performance report</div><div style="opacity:.9">${esc(periodLabel(q))}</div></div><div style="border:1px solid #e5e7f0;border-top:0;padding:20px;border-radius:0 0 14px 14px"><table width="100%" cellspacing="0" cellpadding="0"><tr>${cell('Views', fmtN(T.views), q.growth('views'))}${cell('Reach', fmtN(T.reach), q.growth('reach'))}${cell('Followers', '+' + fmtFull(T.followers), q.growth('followers'))}</tr></table><h3 style="margin:22px 0 8px">Wins</h3><ul style="padding-left:18px;margin:0">${lis(wins)}</ul><h3 style="margin:22px 0 8px">Next steps</h3><ul style="padding-left:18px;margin:0">${lis(next)}</ul><p style="margin-top:24px"><a href="#" style="background:#6d5df6;color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:600">Open live dashboard</a></p><p style="font-size:12px;color:#8b90b0;margin-top:22px">Sent by ${esc(Store.db.settings.agency)}</p></div></div>`;
+    return `<div style="font-family:Inter,Segoe UI,Arial,sans-serif;max-width:600px;margin:auto;color:#1b1d3a"><div style="background:linear-gradient(135deg,#16305f,#1f5f8f);padding:24px;border-radius:14px 14px 0 0;color:#fff"><div style="font-size:13px;opacity:.85">${esc(Store.db.settings.agency)} · ${esc(Store.db.settings.tagline)}</div><div style="font-size:22px;font-weight:700;margin-top:6px">${esc(c.name)} — Performance report</div><div style="opacity:.9">${esc(periodLabel(q))}</div></div><div style="border:1px solid #e5e7f0;border-top:0;padding:20px;border-radius:0 0 14px 14px"><table width="100%" cellspacing="0" cellpadding="0"><tr>${cell('Views', fmtN(T.views), q.growth('views'))}${cell('Reach', fmtN(T.reach), q.growth('reach'))}${cell('Followers', '+' + fmtFull(T.followers), q.growth('followers'))}</tr></table><h3 style="margin:22px 0 8px">Wins</h3><ul style="padding-left:18px;margin:0">${lis(wins)}</ul><h3 style="margin:22px 0 8px">Next steps</h3><ul style="padding-left:18px;margin:0">${lis(next)}</ul><p style="margin-top:24px"><a href="#" style="background:#2f6fed;color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:600">Open live dashboard</a></p><p style="font-size:12px;color:#8b90b0;margin-top:22px">Sent by ${esc(Store.db.settings.agency)}</p></div></div>`;
   }
 
   /* ---------- exports ---------- */

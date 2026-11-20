@@ -106,7 +106,7 @@
 
   /* ---------- logos ---------- */
   function ermLogo(s = 36) {
-    return `<svg width="${s}" height="${s}" viewBox="0 0 48 48" aria-label="ERM Marketing"><defs><linearGradient id="ermg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs><rect width="48" height="48" rx="14" fill="url(#ermg)"/><path d="M15 14h18v4.2H19.4v4.1H31v4.1H19.4v4.4H33V35H15z" fill="#fff"/><path d="M33 12l4 4-4 4" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" transform="translate(-1 -1)"/></svg>`;
+    return `<svg width="${s}" height="${s}" viewBox="0 0 48 48" aria-label="ERM Marketing"><defs><linearGradient id="ermg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2f6fed"/><stop offset="1" stop-color="#1fa2b8"/></linearGradient></defs><rect width="48" height="48" rx="14" fill="url(#ermg)"/><path d="M15 14h18v4.2H19.4v4.1H31v4.1H19.4v4.4H33V35H15z" fill="#fff"/><path d="M33 12l4 4-4 4" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" transform="translate(-1 -1)"/></svg>`;
   }
   function clientLogo(c, s = 44) {
     if (c.logoUrl) return `<img class="clogo" src="${esc(c.logoUrl)}" width="${s}" height="${s}" alt="${esc(c.name)}" style="border-radius:${s * .3}px;object-fit:cover">`;
@@ -158,7 +158,7 @@
     const uid_ = 'g' + (++gid);
     let o = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img"><defs>`;
     series.forEach((s, k) => { o += `<linearGradient id="${uid_}a${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s.color}" stop-opacity="${light ? .25 : .38}"/><stop offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient>`; });
-    o += `<linearGradient id="${uid_}s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs>`;
+    o += `<linearGradient id="${uid_}s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2f6fed"/><stop offset="1" stop-color="#1fa2b8"/></linearGradient></defs>`;
     for (let g = 0; g <= 4; g++) {
       const y = T + ih * g / 4; o += `<line x1="${L}" x2="${W - R}" y1="${y}" y2="${y}" stroke="${grid}" stroke-dasharray="${g ? '3 5' : ''}"/><text x="${L - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="${txt}">${yFmt(max * (1 - g / 4))}</text>`;
     }
@@ -204,10 +204,10 @@
     return o + `</svg><div class="donut-c">${center}</div>`;
   }
 
-  function barChart({ items, height = 200, light = false, fmt = fmtN, color = '#6d7cff' }) {
+  function barChart({ items, height = 200, light = false, fmt = fmtN, color = '#4a86f2' }) {
     const W = 520, H = height, L = 8, B = 26, T = 20; const mx = Math.max(1, ...items.map(i => i.value)) * 1.08;
     const bw = (W - L * 2) / items.length; const txt = light ? '#6b7090' : '#8b90b0';
-    let o = `<svg class="chart" viewBox="0 0 ${W} ${H}"><defs><linearGradient id="bg${++gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a855f7"/><stop offset="1" stop-color="#3b82f6"/></linearGradient></defs>`;
+    let o = `<svg class="chart" viewBox="0 0 ${W} ${H}"><defs><linearGradient id="bg${++gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1fa2b8"/><stop offset="1" stop-color="#2f6fed"/></linearGradient></defs>`;
     items.forEach((it, i) => {
       const h = (it.value / mx) * (H - B - T), x = L + i * bw + bw * .18, w = bw * .64, y = H - B - h;
       const fill = it.color || (light ? color : `url(#bg${gid})`);
@@ -227,7 +227,7 @@
       row.forEach((v, si) => {
         const k = v / mx; const a = 0.08 + k * .92;
         const tip = `<b>${days[di]} · ${slots[si]}</b><div>Avg ${fmtN(v)} views / post</div>`;
-        o += `<span class="hc ${k > .82 ? 'top' : ''}" style="background:rgba(${light ? '90,80,240' : '124,92,255'},${a.toFixed(2)})" ${light ? '' : `data-tip="${esc(tip)}"`}></span>`;
+        o += `<span class="hc ${k > .82 ? 'top' : ''}" style="background:rgba(${light ? '47,111,237' : '47,111,237'},${a.toFixed(2)})" ${light ? '' : `data-tip="${esc(tip)}"`}></span>`;
       });
     });
     return o + '</div>';

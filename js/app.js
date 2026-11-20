@@ -34,7 +34,7 @@
         <div class="brandrow">${ermLogo(46)}<div><b>ERM Marketing</b><small>${esc(D.settings.tagline)}</small></div></div>
         <h1>Your content, <span class="grad">live</span> and growing.</h1>
         <p>One platform to run the agency — and a stunning live dashboard for every client.</p>
-        <div class="glass login-demo"><div class="live"><i></i>Live<small>· demo preview</small></div><div class="big count" data-count="2480000" data-fmt="full">0</div><div class="muted">views this month across all clients</div><div class="spark-wrap">${U.sparkline([4, 5, 4.4, 6, 7, 6.6, 8.5, 9, 8.2, 10.5, 12, 14], '#8b7bff', 300, 60)}</div><span class="gchip up">${ico('up', 12)}28.4%</span></div>
+        <div class="glass login-demo"><div class="live"><i></i>Live<small>· demo preview</small></div><div class="big count" data-count="2480000" data-fmt="full">0</div><div class="muted">views this month across all clients</div><div class="spark-wrap">${U.sparkline([4, 5, 4.4, 6, 7, 6.6, 8.5, 9, 8.2, 10.5, 12, 14], '#5b9bff', 300, 60)}</div><span class="gchip up">${ico('up', 12)}28.4%</span></div>
       </section>
       <section class="login-card glass"><h2>Welcome back</h2><p class="muted">Sign in to your dashboard</p>
         <form id="lf" class="form"><label>Email<input id="le" type="email" autocomplete="username" required placeholder="you@company.com"></label><label>Password<input id="lp" type="password" autocomplete="current-password" required placeholder="••••••••"></label><div class="err" id="lerr" hidden></div><button class="btn primary lg">Sign in ${ico('chev', 16)}</button></form>

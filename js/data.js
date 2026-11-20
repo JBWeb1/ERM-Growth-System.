@@ -238,13 +238,15 @@
       { id: 'a3', ts: Date.now() - 36e5 * 20, text: 'Lakeside Realty opened the proposal 5 times', icon: 'file', read: false },
       { id: 'a4', ts: Date.now() - 36e5 * 30, text: 'Follow-up due: GreenLeaf Vegan Kitchen', icon: 'clock', read: true }
     ];
-    const settings = { agency: 'ERM Marketing', tagline: 'Build | Automate | Grow', accent1: '#3b82f6', accent2: '#8b5cf6', zarRate: 18.5, whiteLabel: false, email: 'hello@ermmarketing.co' };
+    const settings = { agency: 'ERM Marketing', tagline: 'Build | Automate | Grow', accent1: '#2f6fed', accent2: '#1fa2b8', zarRate: 18.5, whiteLabel: false, email: 'hello@ermmarketing.co' };
     const integrations = { tiktok: false, meta: false, youtube: false, windsor: false, stripe: false, whatsapp: false };
     return { v: 1, clients, leads, tasks, content, invoices, proposals, templates, comms, timeline, messages, goals, schedules, requests, team, notifications, settings, integrations };
   }
 
   let DB;
-  function load() { try { DB = JSON.parse(localStorage.getItem(KEY)); } catch (e) { DB = null; } if (!DB || DB.v !== 1) { DB = seedStore(); save(); } }
+  function load() { try { DB = JSON.parse(localStorage.getItem(KEY)); } catch (e) { DB = null; } if (!DB || DB.v !== 1) { DB = seedStore(); save(); }
+    else if (DB.settings && DB.settings.accent1 === '#3b82f6' && DB.settings.accent2 === '#8b5cf6') { DB.settings.accent1 = '#2f6fed'; DB.settings.accent2 = '#1fa2b8'; save(); } // migrate old neon default
+  }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(DB)); } catch (e) { /* storage may be blocked; demo still works in-memory */ } }
   SEED_CLIENTS.forEach(buildMetrics);
   load();
