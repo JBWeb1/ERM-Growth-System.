@@ -6,8 +6,8 @@
   const DB = () => Store.db;
 
   const NAV = [
-    ['dashboard', 'Dashboard', 'grid', ['admin', 'team']], ['clients', 'Clients', 'users', ['admin', 'team']], ['analytics', 'Analytics', 'trend', ['admin', 'team']], ['leads', 'Leads & pipeline', 'target', ['admin', 'team']],
-    ['tasks', 'Tasks & calendar', 'checksq', ['admin', 'team']], ['invoices', 'Invoices', 'dollar', ['admin']], ['proposals', 'Proposals', 'file', ['admin']],
+    ['dashboard', 'Dashboard', 'grid', ['admin', 'team']], ['clients', 'Clients', 'users', ['admin', 'team']], ['analytics', 'Analytics', 'trend', ['admin', 'team']], ['studio', 'Content studio', 'zap', ['admin', 'team']], ['leads', 'Leads & pipeline', 'target', ['admin', 'team']],
+    ['tasks', 'Tasks & calendar', 'checksq', ['admin', 'team']], ['invoices', 'Invoices', 'dollar', ['admin']], ['forecast', 'Forecast', 'trend', ['admin']], ['proposals', 'Proposals', 'file', ['admin']],
     ['messages', 'Templates & comms', 'mail', ['admin', 'team']], ['reports', 'Reports', 'bars', ['admin', 'team']], ['settings', 'Settings', 'settings', ['admin']]
   ];
   const ROLE_PERMS = [['View all clients & portals', 1, 1, 0], ['Manage clients & leads', 1, 1, 0], ['Tasks & content calendar', 1, 1, 0], ['Generate & send reports', 1, 1, 0], ['Invoices & payments', 1, 0, 0], ['Proposals & contracts', 1, 0, 0], ['Settings, branding & team', 1, 0, 0], ['Own client portal only', 0, 0, 1]];
@@ -303,9 +303,9 @@
     if (nav && !nav[3].includes(user.role)) { main.innerHTML = `<div class="view">${empty('No access', 'Your role (' + user.role + ') can\'t open this section.')}</div>`; return; }
     let html;
     if (page === 'client') html = clientDetail(parts[1], parts[2] || 'overview');
-    else html = { dashboard, clients, analytics: Insights.analyticsHTML, leads, tasks, invoices, proposals, messages: messagesPage, reports: reportsPage, settings }[page]?.() || empty('Not found', '');
-    if (page === 'dashboard') html += Growth.dashboardCards();
-    main.innerHTML = `<div class="view">${html}</div>`; U.runCounters(main); bind(main, parts); Growth.bind(main); if (page === 'analytics') Insights.bindAnalytics(main);
+    else html = { dashboard, clients, analytics: Insights.analyticsHTML, studio: Studio.studioHTML, forecast: Studio.forecastHTML, leads, tasks, invoices, proposals, messages: messagesPage, reports: reportsPage, settings }[page]?.() || empty('Not found', '');
+    if (page === 'dashboard') { html = html.replace('<div class="grid charts">', Studio.briefingHTML() + '<div class="grid charts">'); html += Growth.dashboardCards(); }
+    main.innerHTML = `<div class="view">${html}</div>`; U.runCounters(main); bind(main, parts); Growth.bind(main); if (page === 'studio') Studio.bindAdmin(main); if (page === 'analytics') Insights.bindAnalytics(main);
   }
 
   function bind(main, parts) {

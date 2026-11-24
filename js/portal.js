@@ -40,7 +40,7 @@
       <div class="hero-sub"><div><b>${cnt(T.reach, 'k', 'v:hreach')}</b><span>Reach</span></div><div><b>${cnt(T.engagement, 'pct', 'v:hen')}</b><span>Engagement</span></div><div><b>+${cnt(T.followers, 'full', 'v:hfol')}</b><span>New followers</span></div></div></div>
       <div class="hero-r" id="ch-hero">${heroChart(c, q, plats)}</div></div>`;
 
-    o += Insights.pulseCard(c, plats) + Insights.milestoneStrip(c);
+    o += Studio.feedbackCard(c, ctx) + Insights.pulseCard(c, plats) + Insights.milestoneStrip(c);
 
     // platform cards
     o += `<div class="grid plat-grid">${conn.map(p => { const t = qa.byPlatform[p]; const g = qa.pgrowth(p, 'views'); const spark = qa.daily.map((_, i) => 0); const sp = Metrics.query(c.id, { from: addDays(TODAY, -13), to: TODAY, platforms: [p] }).daily.map(d => d.views);
@@ -103,7 +103,7 @@
   function audienceHTML(c, ctx) {
     const r = range(), conn = Metrics.connected(c.id), plats = st.platform === 'all' ? conn : [st.platform];
     const q = Metrics.query(c.id, { ...r, platforms: plats });
-    return `<div class="page-h"><div><h1>Audience &amp; <span class="grad">reach</span></h1><p class="muted">Who is watching, where views come from, and how you're growing · ${rangeLabel(q)}</p></div><div class="actions"><button class="btn sm" id="csv">${ico('download', 14)} CSV</button></div></div>${toolbar(c, ctx)}${Insights.audienceBody(c, q, plats)}`;
+    return `<div class="page-h"><div><h1>Audience &amp; <span class="grad">reach</span></h1><p class="muted">Who is watching, where views come from, and how you're growing · ${rangeLabel(q)}</p></div><div class="actions"><button class="btn sm" id="csv">${ico('download', 14)} CSV</button></div></div>${toolbar(c, ctx)}${Studio.benchmarkCard(c, q)}${Insights.audienceBody(c, q, plats)}`;
   }
 
   /* ---------- Content ---------- */
@@ -153,11 +153,12 @@
   function render(main, c, sub, ctx = {}) {
     clearInterval(timer); main.dataset.sub = sub;
     const draw = () => {
-      main.innerHTML = `<div class="view">${{ overview: overviewHTML, audience: audienceHTML, content: contentHTML, goals: goalsHTML, approvals: approvalsHTML, messages: messagesHTML }[sub](c, ctx)}</div>`;
+      main.innerHTML = `<div class="view">${{ overview: overviewHTML, audience: audienceHTML, content: contentHTML, goals: goalsHTML, approvals: approvalsHTML, messages: (cc, x) => messagesHTML(cc, x) + Studio.referralCard(cc) }[sub](c, ctx)}</div>`;
       U.runCounters(main); bind();
       const m = $('#msgs', main); if (m) m.scrollTop = m.scrollHeight;
     };
     const bind = () => {
+      Studio.bindPortal(main, c, ctx, draw);
       const rng = $('#tb-range', main);
       if (rng) {
         rng.onclick = e => { const b = e.target.closest('[data-r]'); if (!b) return; st.preset = b.dataset.r; if (st.preset === 'custom') { st.from = addDays(TODAY, -13); st.to = TODAY; } draw(); };

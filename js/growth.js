@@ -20,6 +20,7 @@
       { k: 'portal', name: 'Portal activity', w: 20, s: daysSince <= 3 ? 100 : daysSince <= 7 ? 80 : daysSince <= 14 ? 55 : daysSince <= 21 ? 30 : 10, detail: act.last ? `Last visit ${ago(act.last)}` : 'Never visited', tip: 'They have not looked at their dashboard lately — send the weekly-wins message.' },
       { k: 'bill', name: 'Billing', w: 15, s: overdue === 0 ? 100 : overdue === 1 ? 40 : 10, detail: overdue ? `${overdue} overdue invoice${overdue > 1 ? 's' : ''}` : 'All invoices on time', tip: 'Chase the overdue invoice (use the Invoice reminder template).' },
       { k: 'contract', name: 'Contract runway', w: 10, s: left > 90 ? 100 : left > 60 ? 80 : left > 30 ? 55 : left > 0 ? 30 : 10, detail: left > 0 ? `${left} days left` : `Expired ${-left} days ago`, tip: 'Contract is ending — start the renewal conversation now.' },
+      (() => { const f = Studio.feedbackFor(cid)[0]; return { k: 'sat', name: 'Client satisfaction', w: 10, s: !f ? 70 : f.score >= 9 ? 100 : f.score >= 7 ? 75 : 25, detail: f ? `Rated us ${f.score}/10 · ${ago(f.ts)}` : 'No rating yet', tip: f && f.score <= 6 ? `They rated us ${f.score}/10${f.comment ? ` (“${f.comment}”)` : ''} — call them this week.` : 'Ask for a satisfaction rating.' }; })(),
       { k: 'appr', name: 'Approvals responsiveness', w: 10, s: [100, 75, 55, 30][Math.min(3, pending)], detail: pending ? `${pending} item${pending > 1 ? 's' : ''} awaiting approval` : 'Nothing waiting', tip: 'Content is waiting on them — nudge with the approval reminder.' }
     ];
     const score = Math.round(F.reduce((a, f) => a + f.s * f.w, 0) / F.reduce((a, f) => a + f.w, 0));
@@ -137,8 +138,9 @@
       <label>What do you want to achieve?<textarea name="notes" rows="3" placeholder="More bookings, more followers, lead automation…"></textarea></label><button class="btn primary lg">Request my free audit ${ico('chev', 16)}</button><p class="hint">Demo form: submissions land in this browser's pipeline (Phase 2 saves to your database and emails you).</p></form></div></div></div>`;
     $('#lf-f', root).onsubmit = e => {
       e.preventDefault(); const d = Object.fromEntries(new FormData(e.target));
-      Store.add('leads', { name: d.name, contact: d.contact, email: d.email, phone: d.phone, stage: 'New', source: 'Website', value: BUDGET[d.budget], currency: d.currency, follow: addDays(TODAY, 1), notes: d.notes || '' });
-      Store.notify(`New website lead: ${d.name}`, 'target');
+      const rm = location.hash.match(/ref=([\w-]+)/), rc = rm && Store.client(rm[1]);
+      Store.add('leads', { name: d.name, contact: d.contact, email: d.email, phone: d.phone, stage: 'New', source: rc ? `Referral: ${rc.name}` : 'Website', value: BUDGET[d.budget], currency: d.currency, follow: addDays(TODAY, 1), notes: d.notes || '' });
+      Store.notify(rc ? `New referral from ${rc.name}: ${d.name} 🎁` : `New website lead: ${d.name}`, 'target');
       $('#lf-body', root).innerHTML = `<div class="lf-ok"><div class="e-ico">${ico('check', 28)}</div><h1>Thank you, ${esc(d.contact.split(' ')[0])}!</h1><p class="muted">We've received your request and will be in touch within one business day.</p></div>`;
     };
   }

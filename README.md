@@ -36,3 +36,6 @@ Seven professional themes — Corporate Navy (default), Executive White, Ocean L
 
 ## Retention & growth features
 Client **health score** (dashboard, client cards, per-client Health tab with recommended actions) · **renewal reminders** (60-day window, one-click renewal email + task) · **automatic alerts** (viral posts, milestones, goals, overdue invoices, churn risk, renewals — toggles in Settings → Automations; good news is also posted to the client's portal Messages) · **onboarding checklist** (auto-created when a lead converts) · **presentation mode** (▶ Present: full-screen slideshow of a client's results for review meetings) · **public lead-capture form** (`#/lead-form`, embeddable; submissions become pipeline leads).
+
+## Studio features
+**Today's briefing** (prioritised daily to-do list on the dashboard) · **Content studio** (hooks, captions, hashtags and best slots per client; one-click *Auto-plan 2 weeks* fills the content calendar) · **Satisfaction pulse** (0–10 rating in the client portal, feeds the health score) · **Revenue forecast** (6-month expected MRR, MRR at risk, scenarios, weighted pipeline) · **Benchmarks** ("How you compare" vs industry and other ERM clients) · **Referral links** (clients share a personal link; leads are tagged `Referral: <client>`).
