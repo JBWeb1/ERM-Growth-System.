@@ -305,7 +305,7 @@
     if (page === 'client') html = clientDetail(parts[1], parts[2] || 'overview');
     else html = { dashboard, clients, analytics: Insights.analyticsHTML, studio: Studio.studioHTML, forecast: Studio.forecastHTML, leads, tasks, invoices, proposals, messages: messagesPage, reports: reportsPage, settings }[page]?.() || empty('Not found', '');
     if (page === 'dashboard') { html = html.replace('<div class="grid charts">', Studio.briefingHTML() + '<div class="grid charts">'); html += Growth.dashboardCards(); }
-    main.innerHTML = `<div class="view">${html}</div>`; U.runCounters(main); bind(main, parts); Growth.bind(main); if (page === 'studio') Studio.bindAdmin(main); if (page === 'analytics') Insights.bindAnalytics(main);
+    main.innerHTML = `<div class="view">${html}</div>`; U.runCounters(main); bind(main, parts); Motion.scan(main); Growth.bind(main); if (page === 'studio') Studio.bindAdmin(main); if (page === 'analytics') Insights.bindAnalytics(main);
   }
 
   function bind(main, parts) {

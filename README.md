@@ -39,3 +39,6 @@ Client **health score** (dashboard, client cards, per-client Health tab with rec
 
 ## Studio features
 **Today's briefing** (prioritised daily to-do list on the dashboard) · **Content studio** (hooks, captions, hashtags and best slots per client; one-click *Auto-plan 2 weeks* fills the content calendar) · **Satisfaction pulse** (0–10 rating in the client portal, feeds the health score) · **Revenue forecast** (6-month expected MRR, MRR at risk, scenarios, weighted pipeline) · **Benchmarks** ("How you compare" vs industry and other ERM clients) · **Referral links** (clients share a personal link; leads are tagged `Referral: <client>`).
+
+## Scroll animations
+Reveal-on-scroll (cards fade/slide/zoom in with stagger; platform cards alternate left/right), counters that count up only when scrolled into view, charts that draw when they appear, parallax background and hero, a gradient scroll-progress bar, right-edge section dots (scroll-spy, click to jump), a back-to-top button with a progress ring, a live results ticker, and swipeable carousels on phones. All effects respect `prefers-reduced-motion`. Code: `js/motion.js` + the "scroll motion" block in `css/styles.css`.

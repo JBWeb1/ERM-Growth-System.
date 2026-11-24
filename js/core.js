@@ -127,13 +127,12 @@
     };
     el._raf = requestAnimationFrame(step);
   }
-  function runCounters(root = document) {
-    $$('[data-count]', root).forEach(el => {
-      const mode = el.dataset.fmt;
-      const fmt = mode === 'k' ? fmtN : mode === 'pct' ? (n => n.toFixed(1) + '%') : mode === 'hrs' ? fmtHours : mode === 'full' ? fmtFull : mode === 'money' ? (n => money(n, el.dataset.cur)) : fmtFull;
-      animateCount(el, parseFloat(el.dataset.count), { fmt });
-    });
+  function countEl(el) {
+    const mode = el.dataset.fmt;
+    const fmt = mode === 'k' ? fmtN : mode === 'pct' ? (n => n.toFixed(1) + '%') : mode === 'hrs' ? fmtHours : mode === 'full' ? fmtFull : mode === 'money' ? (n => money(n, el.dataset.cur)) : fmtFull;
+    animateCount(el, parseFloat(el.dataset.count), { fmt });
   }
+  function runCounters(root = document) { $$('[data-count]', root).forEach(countEl); }
 
   /* ---------- charts (pure SVG) ---------- */
   function smoothPath(pts) {
@@ -275,5 +274,5 @@
   }
   function download(name, blob) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
 
-  w.U = { $, $$, esc, clamp, fmtN, fmtFull, fmtPct, money, fmtHours, iso, parse, addDays, diffDays, fmtDate, fmtDateY, todayISO, uid, initials, ago, ico, PLAT, PKEYS, platIcon, ermLogo, clientLogo, animateCount, runCounters, lineChart, sparkline, donut, barChart, heatmap, modal, toast, copyText, download, MON };
+  w.U = { $, $$, esc, clamp, fmtN, fmtFull, fmtPct, money, fmtHours, iso, parse, addDays, diffDays, fmtDate, fmtDateY, todayISO, uid, initials, ago, ico, PLAT, PKEYS, platIcon, ermLogo, clientLogo, animateCount, countEl, runCounters, lineChart, sparkline, donut, barChart, heatmap, modal, toast, copyText, download, MON };
 })(window);

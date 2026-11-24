@@ -35,6 +35,8 @@
     const gr = k => q.growth(k);
     let o = `<div class="page-h"><div><h1>Performance <span class="grad">overview</span></h1><p class="muted">${isToday ? 'Today so far' : rangeLabel(q)} · ${plats.length === conn.length ? 'all platforms' : PLAT[plats[0]].name}</p></div><div class="actions"><button class="btn sm" id="csv">${ico('download', 14)} CSV</button>${liveBadge()}</div></div>${toolbar(c, ctx)}`;
 
+    o += Motion.ticker(c);
+
     // hero
     o += `<div class="glass hero"><div class="hero-l"><div class="eyebrow">${ico('eye', 14)} Total views</div><div class="hero-n">${cnt(T.views, 'full', 'v:hero')}</div><div class="hero-g">${growthChip(gr('views'), 'g:hero')}<span class="muted">${prevLabel}</span></div>
       <div class="hero-sub"><div><b>${cnt(T.reach, 'k', 'v:hreach')}</b><span>Reach</span></div><div><b>${cnt(T.engagement, 'pct', 'v:hen')}</b><span>Engagement</span></div><div><b>+${cnt(T.followers, 'full', 'v:hfol')}</b><span>New followers</span></div></div></div>
@@ -154,7 +156,7 @@
     clearInterval(timer); main.dataset.sub = sub;
     const draw = () => {
       main.innerHTML = `<div class="view">${{ overview: overviewHTML, audience: audienceHTML, content: contentHTML, goals: goalsHTML, approvals: approvalsHTML, messages: (cc, x) => messagesHTML(cc, x) + Studio.referralCard(cc) }[sub](c, ctx)}</div>`;
-      U.runCounters(main); bind();
+      U.runCounters(main); bind(); Motion.scan(main);
       const m = $('#msgs', main); if (m) m.scrollTop = m.scrollHeight;
     };
     const bind = () => {

@@ -424,6 +424,38 @@ details{font-size:.85rem}summary{cursor:pointer;color:var(--a1);font-weight:600}
 @media(max-width:1180px){.studio-f{grid-template-columns:1fr 1fr}.meters{grid-template-columns:1fr}}
 @media(max-width:700px){.studio-f{grid-template-columns:1fr}.nps-row{grid-template-columns:repeat(6,1fr)}.brief-i{grid-template-columns:auto 1fr}.brief-i .btn{grid-column:1/-1}}
 
+/* ---------- scroll motion ---------- */
+:root{--sy:0}
+.rv{opacity:0;transform:translate3d(0,34px,0) scale(.98);transition:opacity .7s cubic-bezier(.2,.8,.2,1),transform .7s cubic-bezier(.2,.8,.2,1);will-change:opacity,transform}
+.rv[data-rv=left]{transform:translate3d(-56px,0,0)}.rv[data-rv=right]{transform:translate3d(56px,0,0)}.rv[data-rv=zoom]{transform:scale(.9)}
+.rv.rv-in{opacity:1;transform:none}
+.pd *{animation-play-state:paused!important}
+#sprog{position:fixed;left:0;top:0;height:3px;width:100%;z-index:400;background:var(--grad);transform:scaleX(0);transform-origin:0 50%;pointer-events:none}
+.bg-orbs{transform:translate3d(0,calc(var(--sy)*-.07px),0)}
+.hero-l{transform:translate3d(0,calc(var(--sy)*.1px),0);opacity:max(.15,calc(1 - var(--sy)/650))}
+.hero-r{transform:translate3d(0,calc(var(--sy)*.05px),0)}
+.topbar{transition:box-shadow .3s,background .3s}.topbar.scrolled{box-shadow:0 10px 30px -18px rgba(0,0,0,.55)}
+#totop{position:fixed;right:22px;bottom:22px;z-index:300;width:48px;height:48px;border-radius:50%;border:0;cursor:pointer;color:var(--text);display:grid;place-items:center;background:conic-gradient(var(--a1) calc(var(--p,0)*1%),var(--card2) 0);opacity:0;transform:translateY(16px) scale(.8);pointer-events:none;transition:.35s cubic-bezier(.2,.8,.2,1)}
+#totop::before{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--pop)}#totop .ico{position:relative}
+#totop.on{opacity:1;transform:none;pointer-events:auto}
+#toasts{bottom:84px}
+.spy{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:200;display:flex;flex-direction:column;gap:14px;align-items:flex-end}
+.spy a{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:.74rem;font-weight:600}
+.spy a span{opacity:0;transform:translateX(8px);transition:.25s;background:var(--pop);border:1px solid var(--stroke);padding:3px 10px;border-radius:999px;white-space:nowrap;pointer-events:none}
+.spy a:hover span,.spy a.on span{opacity:1;transform:none}.spy a.on span{color:var(--text)}
+.spy a i{width:9px;height:9px;border-radius:50%;background:var(--card2);box-shadow:0 0 0 1px var(--stroke);transition:.3s}
+.spy a.on i{background:var(--a1);transform:scale(1.5);box-shadow:0 0 14px var(--a1)}
+.ticker{overflow:hidden;border-radius:999px;border:1px solid var(--stroke);background:var(--card);margin:0 0 16px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.ticker-t{display:flex;width:max-content;gap:44px;padding:11px 22px;animation:tick 55s linear infinite;font-size:.86rem;font-weight:600;white-space:nowrap}
+.ticker:hover .ticker-t{animation-play-state:paused}
+@keyframes tick{to{transform:translateX(-50%)}}
+@media(max-width:700px){
+  .posts.top,.ms-strip{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+  .posts.top>*,.ms-strip>*{flex:0 0 84%;scroll-snap-align:center}
+  #totop{right:14px;bottom:14px;width:42px;height:42px}
+}
+@media(prefers-reduced-motion:reduce){.rv{opacity:1!important;transform:none!important}.ticker-t{animation:none}.bg-orbs,.hero-l,.hero-r{transform:none;opacity:1}}
+
 /* responsive */
 @media(max-width:1180px){.tiles5{grid-template-columns:repeat(3,1fr)}.charts{grid-template-columns:1fr 1fr}.span2{grid-column:1/-1}.goals-mini{grid-template-columns:1fr 1fr}.tiles4{grid-template-columns:1fr 1fr}.rb{grid-template-columns:1fr}.rb-prev{max-height:none}}
 @media(max-width:940px){
@@ -446,3 +478,4 @@ details{font-size:.85rem}summary{cursor:pointer;color:var(--a1);font-weight:600}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 .pc-s svg{width:78px;height:30px}
 #nps-more[hidden]{display:none}
+main{overflow-x:clip}

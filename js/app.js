@@ -127,7 +127,7 @@
   function route(keep) {
     const y = keep ? scrollY : 0;
     const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
-    cleanup && cleanup(); cleanup = null; document.removeEventListener('keydown', slash); document.removeEventListener('click', closePops);
+    Motion.reset(); cleanup && cleanup(); cleanup = null; document.removeEventListener('keydown', slash); document.removeEventListener('click', closePops);
     session = readSession();
     if (parts[0] && parts[0].startsWith('lead-form')) { applyBrand(); Growth.leadFormView(app); return; }
     if (!parts.length || parts[0] === 'login') { if (session && parts[0] !== 'login') { location.hash = session.role === 'client' ? '#/portal/overview' : '#/admin/dashboard'; return; } return loginView(); }
