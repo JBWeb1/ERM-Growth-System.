@@ -129,7 +129,8 @@
   const KEY = 'erm.growth.v1';
   const dAgo = n => addDays(TODAY, -n), dIn = n => addDays(TODAY, n);
   function seedStore() {
-    const clients = SEED_CLIENTS.map(c => ({ ...c, notes: '', logoUrl: '' }));
+    const ENDS = { c1: 75, c2: 200, c3: 330, c4: 38, c5: 20 };
+    const clients = SEED_CLIENTS.map(c => ({ ...c, notes: '', logoUrl: '', end: dIn(ENDS[c.id] || 365), start: dAgo(365 - (ENDS[c.id] || 365)) }));
     const leads = [
       { id: 'l1', name: 'Sunrise Pilates Studio', contact: 'Jade Miller', email: 'jade@sunrisepilates.demo', phone: '+1 646 555 0101', stage: 'New', source: 'Instagram DM', value: 1800, currency: 'USD', follow: dIn(1), notes: 'Found us via reel. Wants 3 reels/week.' },
       { id: 'l2', name: 'Drakensberg Adventures', contact: 'Sipho Ndlovu', email: 'sipho@drakadv.demo', phone: '+27 83 555 0102', stage: 'New', source: 'Website', value: 15000, currency: 'ZAR', follow: dIn(2), notes: '' },
@@ -179,6 +180,8 @@
       { id: 'i9', no: 'ERM-0009', cid: 'c2', amount: 22000, currency: 'ZAR', issued: dAgo(30), due: dAgo(16), status: 'paid', recurring: 'monthly', desc: 'Scale retainer' },
       { id: 'i10', no: 'ERM-0010', cid: 'c3', amount: 2400, currency: 'USD', issued: dAgo(30), due: dAgo(16), status: 'paid', recurring: 'monthly', desc: 'Scale retainer' },
       { id: 'i11', no: 'ERM-0011', cid: 'c4', amount: 12500, currency: 'ZAR', issued: dAgo(30), due: dAgo(9), status: 'overdue', recurring: 'monthly', desc: 'Starter retainer' },
+      { id: 'i14', no: 'ERM-0014', cid: 'c5', amount: 9500, currency: 'ZAR', issued: dAgo(75), due: dAgo(60), status: 'overdue', recurring: 'monthly', desc: 'Starter retainer' },
+      { id: 'i15', no: 'ERM-0015', cid: 'c5', amount: 9500, currency: 'ZAR', issued: dAgo(45), due: dAgo(30), status: 'overdue', recurring: 'monthly', desc: 'Starter retainer' },
       { id: 'i12', no: 'ERM-0012', cid: 'c1', amount: 1500, currency: 'USD', issued: dAgo(2), due: dIn(12), status: 'sent', recurring: 'monthly', desc: 'Growth retainer' },
       { id: 'i13', no: 'ERM-0013', cid: 'c3', amount: 800, currency: 'USD', issued: dAgo(5), due: dIn(9), status: 'sent', recurring: '', desc: 'Extra: 8 UGC-style ads' }
     ];
@@ -240,11 +243,11 @@
     ];
     const settings = { agency: 'ERM Marketing', tagline: 'Build | Automate | Grow', accent1: '#2f6fed', accent2: '#1fa2b8', zarRate: 18.5, whiteLabel: false, email: 'hello@ermmarketing.co' };
     const integrations = { tiktok: false, meta: false, youtube: false, windsor: false, stripe: false, whatsapp: false };
-    return { v: 1, clients, leads, tasks, content, invoices, proposals, templates, comms, timeline, messages, goals, schedules, requests, team, notifications, settings, integrations };
+    return { v: 2, clients, leads, tasks, content, invoices, proposals, templates, comms, timeline, messages, goals, schedules, requests, team, notifications, settings, integrations };
   }
 
   let DB;
-  function load() { try { DB = JSON.parse(localStorage.getItem(KEY)); } catch (e) { DB = null; } if (!DB || DB.v !== 1) { DB = seedStore(); save(); }
+  function load() { let old = null; try { old = JSON.parse(localStorage.getItem(KEY)); } catch (e) { } DB = old; if (!DB || DB.v !== 2) { DB = seedStore(); if (old && old.settings) DB.settings = Object.assign(DB.settings, old.settings); save(); }
     else if (DB.settings && DB.settings.accent1 === '#3b82f6' && DB.settings.accent2 === '#8b5cf6') { DB.settings.accent1 = '#2f6fed'; DB.settings.accent2 = '#1fa2b8'; save(); } // migrate old neon default
   }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(DB)); } catch (e) { /* storage may be blocked; demo still works in-memory */ } }

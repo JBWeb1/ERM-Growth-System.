@@ -82,7 +82,7 @@
   const userChip = s => `<div class="user"><span class="avatar">${esc(U.initials(s.name))}</span><div><b>${esc(s.name)}</b><small class="muted">${s.role}</small></div><button class="icon-btn" id="logout" title="Sign out" aria-label="Sign out">${ico('logout', 18)}</button></div>`;
 
   function mountAdmin(parts) {
-    const s = session; const D = Store.db;
+    const s = session; const D = Store.db; Growth.runAlerts();
     const unread = D.notifications.filter(n => !n.read).length;
     const nav = Admin.NAV.filter(n => n[3].includes(s.role)).map(([k, l, i]) => `<a href="#/admin/${k}" class="${(parts[0] || 'dashboard') === k || (parts[0] === 'client' && k === 'clients') ? 'on' : ''}">${ico(i, 18)}<span>${l}</span></a>`).join('');
     shell({
@@ -115,9 +115,9 @@
       client: c, brandHTML: `${clientLogo(c, 42)}<div><b>${esc(c.name)}</b><small>Client dashboard</small></div>`, navHTML: nav,
       foot: D.settings.whiteLabel ? '' : `<div class="powered">${ermLogo(22)}<small>Powered by <b>ERM Marketing</b><br>${esc(D.settings.tagline)}</small></div>`,
       topLeft: admin ? `<div class="viewas">${ico('eye', 16)} Viewing as <b>${esc(c.name)}</b></div>` : `<div class="hello">Hi ${esc(c.contact.name.replace(/^Dr\.\s*/, '').split(' ')[0])} 👋</div>`,
-      topRight: `${paletteHTML(c)}<button class="btn sm primary hide-m" id="p-rep">${ico('download', 14)} Report</button>${admin ? `<button class="btn sm" id="exit-view">${ico('x', 14)} Exit client view</button>` : userChip(session)}`
+      topRight: `${paletteHTML(c)}<button class="btn sm hide-m" id="p-pres">${ico('play', 14)} Present</button><button class="btn sm primary hide-m" id="p-rep">${ico('download', 14)} Report</button>${admin ? `<button class="btn sm" id="exit-view">${ico('x', 14)} Exit client view</button>` : userChip(session)}`
     });
-    bindTop(); bindPalette(c); const r = $('#p-rep'); if (r) r.onclick = () => Reports.openBuilder(c.id);
+    bindTop(); bindPalette(c); const pp = $('#p-pres'); if (pp) pp.onclick = () => Growth.present(c.id); const r = $('#p-rep'); if (r) r.onclick = () => Reports.openBuilder(c.id);
     const ex = $('#exit-view'); if (ex) ex.onclick = () => { setViewAs(null); location.hash = '#/admin/client/' + c.id; };
     return $('#main');
   }
@@ -129,6 +129,7 @@
     const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
     cleanup && cleanup(); cleanup = null; document.removeEventListener('keydown', slash); document.removeEventListener('click', closePops);
     session = readSession();
+    if (parts[0] && parts[0].startsWith('lead-form')) { applyBrand(); Growth.leadFormView(app); return; }
     if (!parts.length || parts[0] === 'login') { if (session && parts[0] !== 'login') { location.hash = session.role === 'client' ? '#/portal/overview' : '#/admin/dashboard'; return; } return loginView(); }
     if (!session) { location.hash = '#/login'; return; }
     if (parts[0] === 'admin') {

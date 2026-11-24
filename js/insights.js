@@ -186,5 +186,5 @@
     $$('[data-copy]', main).forEach(b => b.onclick = () => copyText(b.dataset.copy));
   }
 
-  w.Insights = { pulseCard, refreshPulse, milestoneStrip, audienceBody, postModal, exportCSV, logView, analyticsHTML, bindAnalytics, milestones };
+  w.Insights = { activity, pulseCard, refreshPulse, milestoneStrip, audienceBody, postModal, exportCSV, logView, analyticsHTML, bindAnalytics, milestones };
 })(window);

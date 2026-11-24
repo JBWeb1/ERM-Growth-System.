@@ -63,7 +63,7 @@
     <div class="grid cl-grid">${list.map(c => { const q = Metrics.query(c.id, { from: addDays(TODAY, -29), to: TODAY }), g = q.growth('views');
       return `<div class="glass ccard" style="--b1:${c.color};--b2:${c.color2}"><a href="#/admin/client/${c.id}" class="cc-top">${clientLogo(c, 48)}<div><b>${esc(c.name)}</b><small class="muted">${esc(c.industry)} · ${c.country === 'ZA' ? '🇿🇦' : '🇺🇸'} ${c.currency}</small></div>${badge(c.status)}</a>
       <div class="cc-stats"><div><b>${fmtN(q.totals.views)}</b><span>views · 30d</span></div><div><b class="${g >= 0 ? 'up' : 'dn'}">${g >= 0 ? '+' : ''}${g.toFixed(0)}%</b><span>growth</span></div><div><b>${money(c.retainer, c.currency)}</b><span>${esc(c.pkg)} /mo</span></div></div>
-      <div class="cc-act"><a class="btn sm" href="#/admin/client/${c.id}">Open</a><button class="btn sm" data-view="${c.id}">${ico('eye', 14)} Portal</button><button class="btn sm primary" data-rep="${c.id}">${ico('file', 14)} Report</button></div></div>`; }).join('') || empty('No clients here', 'Change the filter or add a client.')}</div>`;
+      <div class="hp-row">${Growth.healthPill(c.id)}</div><div class="cc-act"><a class="btn sm" href="#/admin/client/${c.id}">Open</a><button class="btn sm" data-view="${c.id}">${ico('eye', 14)} Portal</button><button class="btn sm primary" data-rep="${c.id}">${ico('file', 14)} Report</button></div></div>`; }).join('') || empty('No clients here', 'Change the filter or add a client.')}</div>`;
   }
   function clientForm(c) {
     const isNew = !c;
@@ -78,13 +78,13 @@
         ...(isNew ? [{ name: 'color', label: 'Brand colour', type: 'color', value: 'var(--c1)' }] : [{ name: 'color', label: 'Brand colour', type: 'color', value: c.color }, { name: 'logoUrl', label: 'Logo URL (optional)', value: c.logoUrl || '' }])
       ], onSubmit(d) {
         const patch = { name: d.name, industry: d.industry, country: d.country, currency: d.currency, pkg: d.pkg, retainer: +d.retainer || 0, status: d.status, start: d.start, end: d.end, color: d.color, contact: { name: d.cname, email: d.email, phone: d.phone } };
-        if (isNew) { const n = Store.addClient({ ...patch, id: uid('c'), color2: '#1fa2b8', login: { email: d.email, password: 'demo123' } }); Store.log(n.id, 'Client created', 'userplus'); toast('Client created — login: ' + d.email + ' / demo123'); location.hash = '#/admin/client/' + n.id; }
+        if (isNew) { const n = Store.addClient({ ...patch, id: uid('c'), color2: '#1fa2b8', login: { email: d.email, password: 'demo123' } }); Store.log(n.id, 'Client created', 'userplus'); Growth.startOnboarding(n.id); toast('Client created — login: ' + d.email + ' / demo123'); location.hash = '#/admin/client/' + n.id; }
         else { Object.assign(c, patch, { logoUrl: d.logoUrl || '' }); c.login = { ...c.login, email: d.email }; Store.save(); Store.log(c.id, 'Profile updated', 'edit'); toast('Saved'); refresh(); }
       }
     });
   }
 
-  const CTABS = [['overview', 'Overview'], ['performance', 'Performance'], ['accounts', 'Social accounts'], ['content', 'Content'], ['billing', 'Billing'], ['comms', 'Communication'], ['timeline', 'Timeline'], ['notes', 'Notes']];
+  const CTABS = [['overview', 'Overview'], ['performance', 'Performance'], ['health', 'Health'], ['onboarding', 'Onboarding'], ['accounts', 'Social accounts'], ['content', 'Content'], ['billing', 'Billing'], ['comms', 'Communication'], ['timeline', 'Timeline'], ['notes', 'Notes']];
   function clientDetail(id, tab = 'overview') {
     const c = Store.client(id); if (!c) return empty('Client not found', '<a href="#/admin/clients">Back to clients</a>');
     const D = DB();
@@ -98,13 +98,15 @@
       <div class="glass card span2"><div class="card-h"><h3>Latest activity</h3></div><div class="tl">${tl(id, 4)}</div></div></div>`;
     }
     if (tab === 'performance') body = `<div class="glass note">${ico('eye', 18)}<div><b>This is exactly what ${esc(c.name)} sees.</b><p class="muted">Present it live in meetings.</p></div><button class="btn primary" data-view="${id}">Open full client portal</button></div><div class="grid plat-grid">${Metrics.connected(id).map(p => `<div class="glass pcard" style="--pc:${PLAT[p].color}"><div class="pc-h">${platIcon(p, 34)}<div><b>${PLAT[p].name}</b><small>${esc(c.accounts[p])}</small></div></div><div class="pc-v">${fmtN(q.byPlatform[p].views)}</div><div class="pc-f"><span class="gchip ${q.pgrowth(p, 'views') >= 0 ? 'up' : 'dn'}">${ico(q.pgrowth(p, 'views') >= 0 ? 'up' : 'down', 12)}${Math.abs(q.pgrowth(p, 'views')).toFixed(1)}%</span><span class="muted">${q.byPlatform[p].engagement.toFixed(1)}% eng.</span></div></div>`).join('')}</div><div class="glass card"><div class="chart-wrap">${U.lineChart({ series: [{ name: 'This period', color: 'var(--c1)', data: q.daily.map(d => d.views) }, { name: 'Previous', color: 'rgba(128,140,170,.9)', dashed: true, data: q.prev.daily.map(d => d.views) }], labels: q.daily.map(d => fmtDate(d.d)), height: 280 })}</div></div>`;
+    if (tab === 'health') body = Growth.healthTab(c);
+    if (tab === 'onboarding') body = Growth.onboardingTab(c);
     if (tab === 'accounts') body = accountsTab(c);
     if (tab === 'content') body = `<div class="actions"><button class="btn primary" id="add-content">${ico('plus', 16)} Plan content</button></div><div class="glass tbl-wrap"><table class="tbl"><tr><th>Title</th><th>Platform</th><th>Date</th><th>Status</th><th>Client approval</th></tr>${D.content.filter(k => k.cid === id).sort((a, b) => b.date.localeCompare(a.date)).map(k => `<tr><td><b>${esc(k.title)}</b></td><td>${platIcon(k.platform, 22)}</td><td>${fmtDate(k.date)}</td><td>${badge(k.status)}</td><td>${k.approval ? badge(k.approval, { pending: 'Pending', changes: 'Changes asked', approved: 'Approved' }[k.approval]) : '<span class="muted">—</span>'}</td></tr>`).join('')}</table></div>`;
     if (tab === 'billing') body = `<div class="actions"><button class="btn primary" id="add-inv" data-cid="${id}">${ico('plus', 16)} New invoice</button></div>${invoiceTable(D.invoices.filter(i => i.cid === id))}`;
     if (tab === 'comms') body = `<div class="actions"><button class="btn primary" id="log-comm">${ico('plus', 16)} Log communication</button><button class="btn" id="send-tpl">${ico('send', 16)} Send from template</button></div><div class="glass card">${D.comms.filter(m => m.cid === id).sort((a, b) => b.date.localeCompare(a.date)).map(commRow).join('') || '<p class="muted">No communication logged yet.</p>'}</div>`;
     if (tab === 'timeline') body = `<div class="glass card"><div class="tl">${tl(id, 50)}</div></div>`;
     if (tab === 'notes') body = `<div class="glass card"><label class="lbl">Private notes (never shown to client)</label><textarea id="notes" rows="10" class="full">${esc(c.notes || '')}</textarea><button class="btn primary" id="save-notes">Save notes</button></div>`;
-    return `<a href="#/admin/clients" class="back">${ico('chev', 14)} Clients</a><div class="cd-head glass" style="--b1:${c.color};--b2:${c.color2}">${clientLogo(c, 64)}<div class="cd-t"><h1>${esc(c.name)}</h1><p class="muted">${esc(c.industry)} · ${esc(c.contact.name)}</p></div><select id="c-status" class="sel">${['Lead', 'Active', 'Paused', 'Churned'].map(s => `<option ${s === c.status ? 'selected' : ''}>${s}</option>`).join('')}</select><button class="btn" data-view="${id}">${ico('eye', 16)} View portal</button><button class="btn primary" data-rep="${id}">${ico('file', 16)} Generate report</button></div>
+    return `<a href="#/admin/clients" class="back">${ico('chev', 14)} Clients</a><div class="cd-head glass" style="--b1:${c.color};--b2:${c.color2}">${clientLogo(c, 64)}<div class="cd-t"><h1>${esc(c.name)}</h1><p class="muted">${esc(c.industry)} · ${esc(c.contact.name)}</p></div>${Growth.healthPill(id)}<select id="c-status" class="sel">${['Lead', 'Active', 'Paused', 'Churned'].map(s => `<option ${s === c.status ? 'selected' : ''}>${s}</option>`).join('')}</select><button class="btn" data-pres="${id}">${ico('play', 16)} Present</button><button class="btn" data-view="${id}">${ico('eye', 16)} View portal</button><button class="btn primary" data-rep="${id}">${ico('file', 16)} Generate report</button></div>
     <div class="tabs">${CTABS.map(([k, l]) => `<a href="#/admin/client/${id}/${k}" class="${tab === k ? 'on' : ''}">${l}</a>`).join('')}</div><div class="view">${body}</div>`;
   }
   const tl = (cid, n) => DB().timeline.filter(e => e.cid === cid).slice(0, n).map(e => `<div class="tl-i"><span class="tl-d">${ico(e.icon || 'zap', 14)}</span><div><b>${esc(e.text)}</b><small class="muted">${ago(e.ts)}</small></div></div>`).join('') || '<p class="muted">No activity yet.</p>';
@@ -133,7 +135,7 @@
   const SOURCES = ['Instagram DM', 'TikTok', 'Website', 'Referral', 'Cold outreach', 'WhatsApp', 'Event'];
   function leads() {
     const D = DB();
-    return `${head('Leads & sales pipeline', `Open pipeline: ${money(D.leads.filter(l => !['Won', 'Lost'].includes(l.stage)).reduce((a, l) => a + usd(l.value, l.currency), 0))} (USD eq.)`, `<button class="btn primary" id="add-lead">${ico('plus', 16)} New lead</button>`)}
+    return `${head('Leads & sales pipeline', `Open pipeline: ${money(D.leads.filter(l => !['Won', 'Lost'].includes(l.stage)).reduce((a, l) => a + usd(l.value, l.currency), 0))} (USD eq.)`, `<button class="btn" id="lead-form">${ico('link', 16)} Lead form</button><button class="btn primary" id="add-lead">${ico('plus', 16)} New lead</button>`)}
     <div class="kanban">${STAGES.map(s => { const items = D.leads.filter(l => l.stage === s), v = items.reduce((a, l) => a + usd(l.value, l.currency), 0);
       return `<div class="kcol ${s.replace(/\s/g, '_').toLowerCase()}" data-stage="${s}"><div class="kh"><b>${s}</b><span>${items.length}</span><small>${money(v)}</small></div><div class="kbody">${items.map(l => `<div class="glass kcard" draggable="true" data-id="${l.id}"><b>${esc(l.name)}</b><small class="muted">${esc(l.contact)} · ${esc(l.source)}</small><div class="kf"><span>${money(l.value, l.currency)}</span><span class="${l.follow < TODAY && !['Won', 'Lost'].includes(s) ? 'dn' : 'muted'}">${ico('clock', 12)} ${fmtDate(l.follow)}</span></div></div>`).join('')}</div></div>`; }).join('')}</div><p class="hint">Drag cards between columns — or tap a card to move it, edit it, or convert it to a client.</p>`;
   }
@@ -155,7 +157,7 @@
   function convertLead(l) {
     const pal = [['#22d3ee', '#6366f1'], ['#f59e0b', '#ef4444'], ['#34d399', '#0ea5e9'], ['#38bdf8', '#2563eb']][Math.floor(Math.random() * 4)];
     const n = Store.addClient({ id: uid('c'), name: l.name, color: pal[0], color2: pal[1], country: l.currency === 'ZAR' ? 'ZA' : 'US', currency: l.currency, industry: 'New client', contact: { name: l.contact, email: l.email, phone: l.phone }, pkg: l.value >= (l.currency === 'ZAR' ? 20000 : 2000) ? 'Scale' : l.value >= (l.currency === 'ZAR' ? 14000 : 1400) ? 'Growth' : 'Starter', retainer: l.value, status: 'Active', start: TODAY, end: addDays(TODAY, 365), login: { email: l.email, password: 'demo123' } });
-    l.stage = 'Won'; Store.save(); Store.log(n.id, 'Converted from lead 🎉', 'userplus'); Store.notify(`${l.name} converted to a client`, 'userplus'); toast(`${l.name} is now a client`); location.hash = '#/admin/client/' + n.id;
+    l.stage = 'Won'; Store.save(); Store.log(n.id, 'Converted from lead 🎉', 'userplus'); Growth.startOnboarding(n.id); Store.notify(`${l.name} converted to a client`, 'userplus'); toast(`${l.name} is now a client`); location.hash = '#/admin/client/' + n.id;
   }
 
   /* ======================= TASKS & CALENDAR ======================= */
@@ -284,12 +286,13 @@
   let sTab = 'branding';
   function settings() {
     const D = DB(), s = D.settings;
-    const tabs = `<div class="tabs">${[['branding', 'Branding'], ['team', 'Team & roles'], ['integrations', 'Integrations'], ['data', 'Data']].map(([k, l]) => `<a data-st="${k}" class="${sTab === k ? 'on' : ''}">${l}</a>`).join('')}</div>`;
+    const tabs = `<div class="tabs">${[['branding', 'Branding'], ['automations', 'Automations'], ['team', 'Team & roles'], ['integrations', 'Integrations'], ['data', 'Data']].map(([k, l]) => `<a data-st="${k}" class="${sTab === k ? 'on' : ''}">${l}</a>`).join('')}</div>`;
     let b = '';
     if (sTab === 'branding') b = `<div class="glass card"><form id="brand-f" class="form"><label>Agency name<input name="agency" value="${esc(s.agency)}"></label><label>Tagline<input name="tagline" value="${esc(s.tagline)}"></label><label>Contact email<input name="email" value="${esc(s.email)}"></label><label>Default colour theme (everyone can still switch with the ★ button)</label><div class="pal-grid">${App.THEMES.map(([id, n, dsc, bg, ac]) => `<button type="button" class="swatch ${(s.theme || 'navy') === id ? 'on' : ''}" data-theme-default="${id}"><i style="background:linear-gradient(135deg,${bg} 50%,${ac} 50%)"></i><span>${n}<small>${dsc}</small></span></button>`).join('')}</div><label>USD → ZAR rate<input type="number" step="0.01" name="zarRate" value="${s.zarRate}"></label><label class="check"><input type="checkbox" name="whiteLabel" ${s.whiteLabel ? 'checked' : ''}><span>White-label client portals (hide “Powered by ERM Marketing”)</span></label><button class="btn primary">Save branding</button></form></div>`;
     if (sTab === 'team') b = `<div class="glass tbl-wrap"><table class="tbl"><tr><th>Member</th><th>Email</th><th>Role</th></tr>${D.team.map(u => `<tr><td><b>${esc(u.name)}</b></td><td>${esc(u.email)}</td><td>${badge(u.role)}</td></tr>`).join('')}${D.clients.map(c => `<tr><td>${esc(c.contact.name)} <small class="muted">${esc(c.name)}</small></td><td>${esc(c.login?.email || c.contact.email)}</td><td>${badge('client')}</td></tr>`).join('')}</table></div><div class="actions"><button class="btn primary" id="add-user">${ico('plus', 16)} Invite team member</button></div><h2 class="sec">Permissions</h2><div class="glass tbl-wrap"><table class="tbl perm"><tr><th>Capability</th><th>Admin</th><th>Team</th><th>Client</th></tr>${ROLE_PERMS.map(r => `<tr><td>${r[0]}</td>${r.slice(1).map(v => `<td>${v ? '<span class="up">' + ico('check', 16) + '</span>' : '<span class="muted">—</span>'}</td>`).join('')}</tr>`).join('')}</table></div><p class="hint">Phase 2 enforces this in the database with Supabase Row-Level Security — a client's login can only ever read rows where <code>client_id</code> matches their own.</p>`;
     if (sTab === 'integrations') b = `<div class="grid cl-grid">${[['tiktok', 'TikTok', 'tiktok', API.tiktok], ['meta', 'Meta (Instagram + Facebook)', 'instagram', API.instagram], ['youtube', 'YouTube', 'youtube', API.youtube]].map(([k, n, p, a]) => `<div class="glass acct"><div class="acct-h">${platIcon(p, 40)}<div><b>${n}</b><small class="muted">${D.integrations[k] ? 'App credentials saved' : 'Not configured'}</small></div></div><p class="muted sm">${esc(a.api)}</p><details><summary>Metrics available</summary><p class="ok">✔ ${esc(a.ok)}</p><p class="no">✖ ${esc(a.no)}</p></details><button class="btn sm ${D.integrations[k] ? '' : 'primary'}" data-int="${k}">${D.integrations[k] ? 'Configured (demo)' : 'Configure app'}</button></div>`).join('')}
     ${[['windsor', 'Windsor.ai (aggregator)', 'zap', 'One connector for TikTok, Instagram, Facebook & YouTube. Skips per-platform app review — fastest route to live data.'], ['stripe', 'Stripe / PayFast', 'dollar', 'Payment links on invoices & automatic retainer collection (USD via Stripe, ZAR via PayFast).'], ['whatsapp', 'WhatsApp Business API', 'comment', 'Send templated messages & report links automatically (needs Meta business verification).']].map(([k, n, i, d]) => `<div class="glass acct"><div class="acct-h"><span class="pico" style="width:40px;height:40px;background:var(--grad)">${ico(i, 20)}</span><div><b>${n}</b><small class="muted">${D.integrations[k] ? 'Connected (demo)' : 'Not connected'}</small></div></div><p class="muted sm">${d}</p><button class="btn sm ${D.integrations[k] ? '' : 'primary'}" data-int="${k}">${D.integrations[k] ? 'Disconnect' : 'Connect'}</button></div>`).join('')}</div>`;
+    if (sTab === 'automations') b = Growth.automationsHTML();
     if (sTab === 'data') b = `<div class="glass card"><h3>Demo data</h3><p class="muted">Everything in Phase 1 is stored in this browser (localStorage). Reset to restore the original demo clients, leads and invoices.</p><div class="actions"><button class="btn" id="export-json">${ico('download', 16)} Export JSON</button><button class="btn danger" id="reset-db">${ico('refresh', 16)} Reset demo data</button></div></div>`;
     return `${head('Settings', 'Branding, team, integrations')}${tabs}<div class="view">${b}</div>`;
   }
@@ -301,7 +304,8 @@
     let html;
     if (page === 'client') html = clientDetail(parts[1], parts[2] || 'overview');
     else html = { dashboard, clients, analytics: Insights.analyticsHTML, leads, tasks, invoices, proposals, messages: messagesPage, reports: reportsPage, settings }[page]?.() || empty('Not found', '');
-    main.innerHTML = `<div class="view">${html}</div>`; U.runCounters(main); bind(main, parts); if (page === 'analytics') Insights.bindAnalytics(main);
+    if (page === 'dashboard') html += Growth.dashboardCards();
+    main.innerHTML = `<div class="view">${html}</div>`; U.runCounters(main); bind(main, parts); Growth.bind(main); if (page === 'analytics') Insights.bindAnalytics(main);
   }
 
   function bind(main, parts) {
@@ -314,7 +318,7 @@
     B('#add-client', () => clientForm()); B('#edit-c', () => clientForm(Store.client(parts[1])));
     const cf = $('#cf', main); if (cf) cf.onclick = e => { const b = e.target.closest('[data-f]'); if (b) { cFilter = b.dataset.f; refresh(); } };
     const cs = $('#c-status', main); if (cs) cs.onchange = () => { const c = Store.client(parts[1]); c.status = cs.value; Store.save(); Store.log(c.id, 'Status changed to ' + cs.value, 'edit'); toast('Status: ' + cs.value); };
-    B('#add-lead', () => leadForm());
+    B('#add-lead', () => leadForm()); B('#lead-form', () => Growth.leadFormModal());
     // kanban
     on('.kcard', el => { el.onclick = () => leadForm(DB().leads.find(l => l.id === el.dataset.id)); el.ondragstart = e => { e.dataTransfer.setData('text/plain', el.dataset.id); el.classList.add('drag'); }; el.ondragend = () => el.classList.remove('drag'); });
     on('.kcol', col => { col.ondragover = e => { e.preventDefault(); col.classList.add('over'); }; col.ondragleave = () => col.classList.remove('over'); col.ondrop = e => { e.preventDefault(); col.classList.remove('over'); const l = DB().leads.find(x => x.id === e.dataTransfer.getData('text/plain')); if (l && l.stage !== col.dataset.stage) { l.stage = col.dataset.stage; Store.save(); toast(`${l.name} → ${l.stage}`); if (l.stage === 'Won') Store.notify(`🎉 ${l.name} marked Won — convert to client!`, 'star'); refresh(); } }; });
@@ -350,5 +354,5 @@
     B('#export-json', () => U.download('erm-growth-export.json', new Blob([JSON.stringify(DB(), null, 2)], { type: 'application/json' })));
   }
 
-  w.Admin = { render, NAV, convertLead, leadForm };
+  w.Admin = { render, NAV, convertLead, leadForm, useTemplate };
 })(window);

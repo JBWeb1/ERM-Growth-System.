@@ -33,3 +33,6 @@ Files in `assets/logo/`: `erm-mark` (icon), `erm-logo-horizontal-dark` / `-light
 
 ## Colour themes
 Seven professional themes — Corporate Navy (default), Executive White, Ocean Light, Emerald Finance, Charcoal & Gold, Slate Indigo, Royal Burgundy. Switch with the ★ button in the top bar (login page, admin and client portal). Admins set the default for everyone in Settings → Branding. In a client portal, a checkbox toggles between the client's own brand colours and the theme colours.
+
+## Retention & growth features
+Client **health score** (dashboard, client cards, per-client Health tab with recommended actions) · **renewal reminders** (60-day window, one-click renewal email + task) · **automatic alerts** (viral posts, milestones, goals, overdue invoices, churn risk, renewals — toggles in Settings → Automations; good news is also posted to the client's portal Messages) · **onboarding checklist** (auto-created when a lead converts) · **presentation mode** (▶ Present: full-screen slideshow of a client's results for review meetings) · **public lead-capture form** (`#/lead-form`, embeddable; submissions become pipeline leads).
